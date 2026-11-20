@@ -1,0 +1,3083 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>GOLFINO（ゴルフィーノ） | 日本全国ゴルフ場対応 スコア管理・航空写真マップ・GPS・高低差＆マネジメント</title>
+  <!-- ブラウザタブ用ファビコン & スマホホーム画面用アプリアイコン -->
+  <link id="app-favicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%236b4e3d'/%3E%3Cstop offset='100%25' stop-color='%231f2022'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='120' height='120' rx='28' fill='url(%23g)'/%3E%3Crect x='6' y='6' width='108' height='108' rx='23' fill='none' stroke='%23d4b89c' stroke-opacity='0.35' stroke-width='2'/%3E%3Cpath d='M26 84 Q56 26 90 42' fill='none' stroke='%23d4b89c' stroke-width='4.5' stroke-linecap='round' stroke-dasharray='6 5'/%3E%3Cpath d='M86 30 V88' stroke='%23ffffff' stroke-width='4.5' stroke-linecap='round'/%3E%3Cpath d='M86 31 L104 39 L86 47 Z' fill='%23d4b89c'/%3E%3Ccircle cx='34' cy='85' r='8' fill='%23ffffff'/%3E%3Cellipse cx='86' cy='89' rx='16' ry='4.5' fill='none' stroke='%23d4b89c' stroke-width='3'/%3E%3C/svg%3E" />
+  <link id="apple-touch-icon" rel="apple-touch-icon" href="" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Leaflet.js (航空写真・実測マップ用) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+JP:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+  <style>
+    /* =========================================================================
+       カラーテーマ定義 (デフォルト: ブラウン＆グレー / Earth & Slate)
+       ========================================================================= */
+    :root, [data-theme="earth"] {
+      --bg-page: #f2f1ef;
+      --bg-surface: #ffffff;
+      --bg-surface-sub: #ebe9e5;
+      --bg-header: #2c2e30;
+      --bg-header-sub: #1f2022;
+      --bg-panel-dark: #2c2e30;
+      --bg-panel-darker: #1f2022;
+      --border-main: #d6d3cd;
+      --border-dark: #45484c;
+      --text-main: #232527;
+      --text-sub: #5c5f63;
+      --text-on-dark: #f7f6f4;
+      --text-on-dark-muted: #c7c3bc;
+      --accent-primary: #6b4e3d;
+      --accent-primary-hover: #583f31;
+      --accent-secondary: #9e826c;
+      --accent-highlight: #d4b89c;
+      --accent-badge-bg: #efe8e1;
+      --accent-badge-text: #583f31;
+      --svg-rough: #383b3e;
+      --svg-rough-alt: #323538;
+      --svg-fairway: #5d645b;
+      --svg-fairway-stroke: #757d72;
+      --svg-green: #6b8068;
+      --svg-green-light: #81997d;
+      --svg-line-1: #d4b89c;
+      --svg-line-2: #e6d5c3;
+    }
+
+    [data-theme="masters"] {
+      --bg-page: #f6f4ee;
+      --bg-surface: #ffffff;
+      --bg-surface-sub: #ede9de;
+      --bg-header: #133326;
+      --bg-header-sub: #0b2118;
+      --bg-panel-dark: #133326;
+      --bg-panel-darker: #0b2118;
+      --border-main: #dcd5c5;
+      --border-dark: #23523f;
+      --text-main: #102a1f;
+      --text-sub: #52635b;
+      --text-on-dark: #f8f6f0;
+      --text-on-dark-muted: #c8d3cd;
+      --accent-primary: #b48a28;
+      --accent-primary-hover: #9c751e;
+      --accent-secondary: #1e6b4b;
+      --accent-highlight: #dfb858;
+      --accent-badge-bg: #e7f2ec;
+      --accent-badge-text: #133326;
+      --svg-rough: #143829;
+      --svg-rough-alt: #184231;
+      --svg-fairway: #256b4c;
+      --svg-fairway-stroke: #348762;
+      --svg-green: #2e8b57;
+      --svg-green-light: #4ade80;
+      --svg-line-1: #dfb858;
+      --svg-line-2: #6ee7b7;
+    }
+
+    [data-theme="turf"] {
+      --bg-page: #f5f2e9;
+      --bg-surface: #ffffff;
+      --bg-surface-sub: #eae5d5;
+      --bg-header: #0d2b1f;
+      --bg-header-sub: #071c14;
+      --bg-panel-dark: #14402e;
+      --bg-panel-darker: #0d2b1f;
+      --border-main: #d8d0bc;
+      --border-dark: #1b573e;
+      --text-main: #0d2b1f;
+      --text-sub: #4b5e55;
+      --text-on-dark: #ffffff;
+      --text-on-dark-muted: #d1fae5;
+      --accent-primary: #10b981;
+      --accent-primary-hover: #059669;
+      --accent-secondary: #247352;
+      --accent-highlight: #34d399;
+      --accent-badge-bg: #d1fae5;
+      --accent-badge-text: #065f46;
+      --svg-rough: #185434;
+      --svg-rough-alt: #1b5e3a;
+      --svg-fairway: #2e8b57;
+      --svg-fairway-stroke: #3da36a;
+      --svg-green: #22c55e;
+      --svg-green-light: #4ade80;
+      --svg-line-1: #fbbf24;
+      --svg-line-2: #34d399;
+    }
+
+    [data-theme="contrast"] {
+      --bg-page: #e5e7eb;
+      --bg-surface: #ffffff;
+      --bg-surface-sub: #f3f4f6;
+      --bg-header: #090d16;
+      --bg-header-sub: #000000;
+      --bg-panel-dark: #111827;
+      --bg-panel-darker: #030712;
+      --border-main: #9ca3af;
+      --border-dark: #374151;
+      --text-main: #030712;
+      --text-sub: #374151;
+      --text-on-dark: #ffffff;
+      --text-on-dark-muted: #e5e7eb;
+      --accent-primary: #d97706;
+      --accent-primary-hover: #b45309;
+      --accent-secondary: #0284c7;
+      --accent-highlight: #fbbf24;
+      --accent-badge-bg: #fef3c7;
+      --accent-badge-text: #92400e;
+      --svg-rough: #1f2937;
+      --svg-rough-alt: #111827;
+      --svg-fairway: #15803d;
+      --svg-fairway-stroke: #22c55e;
+      --svg-green: #16a34a;
+      --svg-green-light: #4ade80;
+      --svg-line-1: #fbbf24;
+      --svg-line-2: #38bdf8;
+    }
+
+    body {
+      font-family: "Inter", "Noto Sans JP", sans-serif;
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      -webkit-tap-highlight-color: transparent;
+      transition: background-color 0.25s ease, color 0.25s ease;
+    }
+
+    /* テーマユーティリティクラス */
+    .th-header { background-color: var(--bg-header); color: var(--text-on-dark); border-color: var(--border-dark); }
+    .th-header-sub { background-color: var(--bg-header-sub); border-color: var(--border-dark); }
+    .th-surface { background-color: var(--bg-surface); border-color: var(--border-main); color: var(--text-main); }
+    .th-surface-sub { background-color: var(--bg-surface-sub); border-color: var(--border-main); color: var(--text-main); }
+    .th-dark-panel { background-color: var(--bg-panel-dark); color: var(--text-on-dark); border-color: var(--border-dark); }
+    .th-darker-box { background-color: var(--bg-panel-darker); color: var(--text-on-dark); border-color: var(--border-dark); }
+    .th-accent-btn { background-color: var(--accent-primary); color: #ffffff; }
+    .th-accent-btn:hover { background-color: var(--accent-primary-hover); }
+    .th-accent-text { color: var(--accent-highlight); }
+    .th-muted-dark { color: var(--text-on-dark-muted); }
+    .th-muted { color: var(--text-sub); }
+    .th-badge { background-color: var(--accent-badge-bg); color: var(--accent-badge-text); border-color: var(--border-main); }
+
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* ゴルフスコア記号 */
+    .score-mark {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      font-weight: 800;
+      font-size: 0.875rem;
+    }
+    .score-eagle {
+      border-radius: 9999px;
+      border: 2px solid #9a6b32;
+      background-color: #f7efe4;
+      color: #6b4518;
+      box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px #9a6b32;
+    }
+    .score-birdie {
+      border-radius: 9999px;
+      border: 2px solid #b84a39;
+      background-color: #fbeae7;
+      color: #8c2f21;
+    }
+    .score-par { color: var(--text-main); }
+    .score-bogey {
+      border: 2px solid #4a6b82;
+      background-color: #eaf0f4;
+      color: #2c485c;
+      border-radius: 4px;
+    }
+    .score-double {
+      border: 2px solid #525558;
+      background-color: #e4e5e7;
+      color: #27292b;
+      border-radius: 4px;
+      box-shadow: 0 0 0 1.5px #fff, 0 0 0 3px #525558;
+    }
+
+    @keyframes livePulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.25); }
+    }
+    .live-dot { animation: livePulse 1.8s infinite ease-in-out; }
+
+    /* =========================================================================
+       PC上でのスマホ表示プレビュー（390x844 iPhoneモックアップフレーム）
+       ========================================================================= */
+    body.phone-preview-mode {
+      background-color: #18191b;
+      padding: 24px 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+    }
+    body.phone-preview-mode #app-shell {
+      width: 390px;
+      max-width: 100%;
+      height: 820px;
+      max-height: 88vh;
+      border-radius: 44px;
+      border: 11px solid #2b2d30;
+      box-shadow: 0 28px 70px rgba(0, 0, 0, 0.65), 0 0 0 2px #4c4f54;
+      overflow-y: auto;
+      overflow-x: hidden;
+      position: relative;
+      background-color: var(--bg-page);
+      padding-bottom: 76px;
+    }
+    body.phone-preview-mode .desktop-only-nav { display: none !important; }
+    body.phone-preview-mode .mobile-bottom-nav {
+      display: block !important;
+      position: sticky !important;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      border-bottom-left-radius: 32px;
+      border-bottom-right-radius: 32px;
+    }
+    body.phone-preview-mode .phone-grid-1 {
+      grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+    }
+
+    /* Leaflet カスタムマーカー・ラベル */
+    .leaflet-container {
+      font-family: "Inter", "Noto Sans JP", sans-serif;
+      z-index: 10;
+    }
+    .golf-pin-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 10px;
+      border-radius: 9999px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.45);
+      border: 2px solid #ffffff;
+      color: #ffffff;
+    }
+    .gps-pulse-ring {
+      width: 26px;
+      height: 26px;
+      border-radius: 9999px;
+      background: rgba(139, 92, 246, 0.35);
+      border: 2px solid #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 12px rgba(124, 58, 237, 0.8);
+    }
+    .gps-pulse-core {
+      width: 12px;
+      height: 12px;
+      border-radius: 9999px;
+      background: #7c3aed;
+      border: 2px solid #ffffff;
+    }
+    .dist-tooltip-label {
+      background: rgba(31, 32, 34, 0.92);
+      color: #e6d5c3;
+      border: 1px solid #9e826c;
+      border-radius: 6px;
+      padding: 2px 6px;
+      font-size: 11px;
+      font-weight: 800;
+      white-space: nowrap;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+    }
+    .dist-tooltip-label.green-leg {
+      color: #ffffff;
+      border-color: #d4b89c;
+    }
+    .dist-tooltip-label.gps-leg {
+      background: rgba(76, 29, 149, 0.92);
+      color: #f3e8ff;
+      border-color: #c4b5fd;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- スマホプレビューモード時のみ上部に表示される解除バー -->
+  <div id="phone-preview-banner" class="hidden mb-3 bg-[#2c2e30] text-white px-4 py-2 rounded-full shadow-lg border border-[#45484c] flex items-center gap-3 text-xs font-bold">
+    <span class="flex items-center gap-1.5 text-[#d4b89c]">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><circle cx="12" cy="18" r="1"/></svg>
+      スマートフォン表示プレビュー中 (390×844)
+    </span>
+    <button onclick="togglePhonePreview()" class="bg-[#6b4e3d] hover:bg-[#583f31] text-white px-3 py-1 rounded-full transition">
+      PC全画面表示に戻す
+    </button>
+  </div>
+
+  <!-- アプリ本体シェル -->
+  <div id="app-shell" class="min-h-screen w-full flex flex-col pb-20 md:pb-6">
+
+    <!-- トップヘッダー -->
+    <header class="th-header sticky top-0 z-40 shadow-md border-b">
+      <div class="max-w-6xl mx-auto px-3 sm:px-4 py-2.5 flex flex-wrap items-center justify-between gap-2">
+        <!-- ロゴ & コンペ名 -->
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center shadow-inner border border-[#d4b89c]/40 shrink-0 relative overflow-hidden" style="background: linear-gradient(135deg, var(--accent-primary), var(--bg-panel-darker));">
+            <svg class="w-7 h-7" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <!-- 上品な外周リング（Gのシルエット） -->
+              <path d="M27.5 11.5C25.5 9.8 22.9 8.8 20 8.8C13.8 8.8 8.8 13.8 8.8 20C8.8 26.2 13.8 31.2 20 31.2C25.5 31.2 30.1 27.2 31 21.9H21.5" stroke="#f7f6f4" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
+              <!-- 弾道アーク -->
+              <path d="M13 26.5C16.5 18.5 22.5 14.5 28.5 14" stroke="#d4b89c" stroke-width="1.8" stroke-linecap="round" stroke-dasharray="2.5 2.5" />
+              <!-- ピンフラッグ -->
+              <path d="M28.5 11.5V26.5" stroke="#d4b89c" stroke-width="2" stroke-linecap="round" />
+              <path d="M28.5 11.8L34.5 14.3L28.5 16.8V11.8Z" fill="#d4b89c" />
+              <!-- ゴルフボール -->
+              <circle cx="13" cy="26.5" r="2.6" fill="#ffffff" />
+            </svg>
+          </div>
+          <div>
+            <div class="flex items-center gap-1.5">
+              <h1 class="font-extrabold tracking-widest text-base sm:text-lg leading-none">GOLFINO</h1>
+              <span class="text-[10px] font-bold tracking-wider px-1.5 py-0.5 rounded bg-white/10 th-accent-text border border-white/15">GPS・全国対応</span>
+            </div>
+            <input id="header-comp-name" type="text" value="" placeholder="コンペ名・ラウンド名を入力" onchange="updateCompName(this.value)" class="bg-transparent text-[11px] th-muted-dark focus:text-white border-b border-transparent focus:border-white/40 focus:outline-none truncate max-w-[165px] sm:max-w-xs mt-0.5" />
+          </div>
+        </div>
+
+        <!-- コース切替・ティー・カラーテーマ・スマホ表示・共有 -->
+        <div class="flex flex-wrap items-center gap-1.5">
+          <!-- コース選択 -->
+          <div class="flex items-center gap-1 bg-black/25 rounded-lg p-1 border border-white/15">
+            <select id="course-selector" aria-label="ゴルフ場選択" class="bg-transparent text-white text-xs font-bold px-1.5 py-1 focus:outline-none max-w-[130px] sm:max-w-[185px] truncate"></select>
+            <button onclick="openCourseManagerModal()" class="bg-white/15 hover:bg-white/25 text-white text-[10px] font-bold px-2 py-1 rounded transition whitespace-nowrap">
+              ＋管理
+            </button>
+          </div>
+
+          <!-- ティー選択 -->
+          <select id="tee-selector" aria-label="使用ティー選択" class="bg-black/25 text-white text-xs font-semibold rounded-lg px-2 py-1.5 border border-white/15 focus:outline-none">
+            <option value="back" class="text-black">BACK</option>
+            <option value="regular" selected class="text-black">REGULAR</option>
+            <option value="ladies" class="text-black">LADIES</option>
+          </select>
+
+          <!-- カラーテーマ選択 -->
+          <select id="theme-selector" aria-label="カラーテーマ選択" onchange="changeColorTheme(this.value)" class="bg-black/25 text-white text-xs font-semibold rounded-lg px-2 py-1.5 border border-white/15 focus:outline-none" title="画面の配色テーマを変更">
+            <option value="earth" selected class="text-black">ブラウン＆グレー</option>
+            <option value="masters" class="text-black">マスターズ＆フォレスト</option>
+            <option value="turf" class="text-black">ターフ＆クラシック</option>
+            <option value="contrast" class="text-black">ハイコントラスト</option>
+          </select>
+
+          <!-- スマホ表示プレビュー切替（PC画面で表示） -->
+          <button onclick="togglePhonePreview()" id="btn-phone-preview" class="hidden md:inline-flex items-center gap-1.5 bg-white/15 hover:bg-white/25 text-white font-bold text-xs px-2.5 py-1.5 rounded-lg border border-white/15 transition">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><circle cx="12" cy="18" r="1"/></svg>
+            <span>スマホ表示</span>
+          </button>
+
+          <!-- 共有ボタン -->
+          <button onclick="openShareModal()" class="th-accent-btn font-bold text-xs px-3 py-1.5 rounded-lg flex items-center gap-1 shadow transition active:scale-95">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
+            </svg>
+            <span>共有</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- デスクトップ用サブナビゲーション -->
+      <nav class="desktop-only-nav hidden md:block th-header-sub border-t">
+        <div class="max-w-6xl mx-auto px-4 flex gap-1">
+          <button onclick="switchTab('scorecard')" data-tab="scorecard" class="nav-btn-desktop px-5 py-2.5 text-sm font-bold border-b-2 text-white flex items-center gap-2 transition" style="border-color: var(--accent-highlight);">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h8M8 15h5"/></svg>
+            スコア入力・カード
+          </button>
+          <button onclick="switchTab('coursemap')" data-tab="coursemap" class="nav-btn-desktop px-5 py-2.5 text-sm font-semibold border-b-2 border-transparent th-muted-dark hover:text-white flex items-center gap-2 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 21s-6-5.33-6-10a6 6 0 1112 0c0 4.67-6 10-6 10z"/><circle cx="12" cy="11" r="2.5"/></svg>
+            コースマップ・GPS・高低差
+          </button>
+          <button onclick="switchTab('leaderboard')" data-tab="leaderboard" class="nav-btn-desktop px-5 py-2.5 text-sm font-semibold border-b-2 border-transparent th-muted-dark hover:text-white flex items-center gap-2 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 01-10 0V4z"/><path d="M7 6H4v2a3 3 0 003 3M17 6h3v2a3 3 0 01-3 3"/></svg>
+            コンペ・リーダーボード
+          </button>
+          <button onclick="switchTab('history')" data-tab="history" class="nav-btn-desktop px-5 py-2.5 text-sm font-semibold border-b-2 border-transparent th-muted-dark hover:text-white flex items-center gap-2 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 3 5-6"/></svg>
+            過去のスコア記録
+          </button>
+        </div>
+      </nav>
+    </header>
+
+    <!-- トースト通知 -->
+    <div id="toast" class="fixed top-16 right-4 z-50 pointer-events-none opacity-0 transition-all duration-300 translate-y-[-8px]">
+      <div class="th-dark-panel px-4 py-2.5 rounded-xl shadow-lg border flex items-center gap-2 text-xs sm:text-sm font-semibold">
+        <span class="w-2 h-2 rounded-full" style="background-color: var(--accent-highlight);"></span>
+        <span id="toast-message">保存しました</span>
+      </div>
+    </div>
+
+    <!-- メインコンテンツ領域 -->
+    <main class="flex-1 max-w-6xl w-full mx-auto px-3 sm:px-4 pt-3.5 space-y-3.5">
+
+      <!-- コース情報サマリーバー -->
+      <section class="th-surface rounded-2xl p-3.5 shadow-xs border flex flex-wrap items-center justify-between gap-2.5">
+        <div class="flex items-center gap-2.5">
+          <div class="th-dark-panel rounded-xl px-3 py-1.5 text-center shrink-0">
+            <div id="course-type-badge" class="text-[10px] th-accent-text font-bold tracking-wider">丘陵・山岳</div>
+            <div id="course-short-name" class="text-xs font-bold">富士桜クラシックCC</div>
+          </div>
+          <div>
+            <div id="course-meta-line" class="text-[11px] th-muted font-medium">OUT / IN 18H ・ Par 72 ・ コースレート 73.2</div>
+            <div class="text-xs font-bold flex flex-wrap items-center gap-1.5 mt-0.5">
+              <span id="course-weather-line">標高 1,050m ・ 晴れ 16℃ / 風: 北西 2m/s</span>
+              <button onclick="switchTab('coursemap'); setMapViewMode('satellite');" class="text-[11px] px-2.5 py-0.5 rounded-full th-badge font-bold border hover:opacity-85 transition inline-flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+                GPS・全国航空写真へ
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 ml-auto">
+          <button onclick="simulateCompetitorsStep()" class="text-xs font-bold th-surface-sub hover:opacity-85 px-3 py-2 rounded-xl border flex items-center gap-1.5 transition active:scale-95">
+            <span class="w-2 h-2 rounded-full live-dot" style="background-color: var(--accent-primary);"></span>
+            他組スコア受信
+          </button>
+          <button onclick="openResetConfirm()" class="text-xs font-semibold th-muted hover:text-red-600 px-2 py-2 rounded-xl transition">
+            リセット
+          </button>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           TAB 1: スコア入力・スコアカード (SCORECARD)
+           ========================================== -->
+      <div id="view-scorecard" class="tab-view space-y-3.5">
+
+        <!-- ホールナビゲーター（1H〜18Hクイック選択） -->
+        <div class="th-surface rounded-2xl p-3 shadow-xs border">
+          <div class="flex items-center justify-between mb-2 px-1">
+            <span class="text-xs font-bold tracking-wide">ホール選択（タップで切替）</span>
+            <div class="flex items-center gap-2 text-[11px] font-semibold th-muted">
+              <span class="inline-flex items-center gap-1"><span class="w-2 h-2 rounded-full" style="background-color: var(--accent-secondary);"></span>入力済</span>
+              <span class="inline-flex items-center gap-1"><span class="w-2 h-2 rounded-full" style="background-color: var(--bg-header);"></span>選択中</span>
+            </div>
+          </div>
+          <div id="hole-selector-bar" class="flex gap-1.5 overflow-x-auto no-scrollbar pb-1"></div>
+        </div>
+
+        <!-- 選択中ホールの詳細＆ワンタップ入力パネル -->
+        <div class="th-dark-panel rounded-2xl p-4 sm:p-5 shadow-md border">
+          <div class="flex flex-wrap items-center justify-between gap-3 pb-3.5 border-b border-white/15">
+            <div class="flex items-center gap-2.5">
+              <button onclick="changeHole(-1)" class="w-10 h-10 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center text-white font-bold text-lg active:scale-95 transition" aria-label="前のホール">
+                ‹
+              </button>
+              <div>
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span id="current-hole-number" class="text-2xl sm:text-3xl font-black tracking-tight text-white">HOLE 1</span>
+                  <span id="current-hole-half" class="text-[11px] font-bold px-2 py-0.5 rounded bg-white/15 th-accent-text">OUT</span>
+                  <span id="current-hole-elev-badge" class="text-[11px] font-bold px-2 py-0.5 rounded bg-black/30 text-amber-200 border border-white/15">打ち下ろし -12m</span>
+                </div>
+                <div class="flex items-center gap-2.5 text-xs sm:text-sm th-muted-dark mt-1 font-semibold">
+                  <span id="current-hole-par" class="text-white font-bold">PAR 4</span>
+                  <span>•</span>
+                  <span id="current-hole-yard">395 YD</span>
+                  <span>•</span>
+                  <span id="current-hole-hdcp">HDCP 7</span>
+                </div>
+              </div>
+              <button onclick="changeHole(1)" class="w-10 h-10 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center text-white font-bold text-lg active:scale-95 transition" aria-label="次のホール">
+                ›
+              </button>
+            </div>
+
+            <button onclick="switchTab('coursemap')" class="th-accent-btn text-xs font-extrabold px-3.5 py-2.5 rounded-xl shadow flex items-center gap-1.5 transition active:scale-95">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+              <span>GPS距離・マップ・高低差</span>
+            </button>
+          </div>
+
+          <!-- 同組メンバー（最大4名）のスコア入力カード -->
+          <div id="group-score-inputs" class="phone-grid-1 grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3.5"></div>
+        </div>
+
+        <!-- 18ホール フルスコアカードテーブル -->
+        <div class="th-surface rounded-2xl shadow-xs border overflow-hidden">
+          <div class="px-4 py-3 th-surface-sub border-b flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <h2 class="font-bold text-sm sm:text-base">第1組 スコアカード一覧（18H）</h2>
+              <span class="text-[11px] th-dark-panel px-2 py-0.5 rounded-md font-semibold">OUT / IN 自動集計</span>
+            </div>
+            <div class="flex items-center gap-2.5 text-[11px] font-semibold th-muted">
+              <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full border border-[#9a6b32] bg-[#f7efe4] inline-block"></span>イーグル</span>
+              <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full border border-[#b84a39] bg-[#fbeae7] inline-block"></span>バーディ</span>
+              <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-sm border border-[#4a6b82] bg-[#eaf0f4] inline-block"></span>ボギー</span>
+              <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-sm border border-[#525558] bg-[#e4e5e7] inline-block"></span>+2以上</span>
+            </div>
+          </div>
+
+          <!-- OUT (1-9H) テーブル -->
+          <div class="overflow-x-auto">
+            <table class="w-full text-center border-collapse text-xs sm:text-sm">
+              <thead>
+                <tr class="th-header font-bold">
+                  <th class="py-2 px-3 text-left sticky left-0 th-header z-10 min-w-[110px]">HOLE (OUT)</th>
+                  <th class="py-2 px-2 min-w-[36px] cursor-pointer hover:bg-white/10" onclick="selectHole(0)">1</th>
+                  <th class="py-2 px-2 min-w-[36px] cursor-pointer hover:bg-white/10" onclick="selectHole(1)">2</th>
+                  <th class="py-2 px-2 min-w-[36px] cursor-pointer hover:bg-white/10" onclick="selectHole(2)">3</th>
+                  <th class="py-2 px-2 min-w-[36px] cursor-pointer hover:bg-white/10" onclick="selectHole(3)">4</th>
+                  <th class="py-2 px-2 min-w-[36px] cursor-pointer hover:bg-white/10" onclick="selectHole(4)">5</th>
+                  <th class="py-2 px-2 min-w-[36px] cursor-pointer hover:bg-white/10" onclick="selectHole(5)">6</th>
+                  <th class="py-2 px-2 min-w-[36px] cursor-pointer hover:bg-white/10" onclick="selectHole(6)">7</th>
+                  <th class="py-2 px-2 min-w-[36px] cursor-pointer hover:bg-white/10" onclick="selectHole(7)">8</th>
+                  <th class="py-2 px-2 min-w-[36px] cursor-pointer hover:bg-white/10" onclick="selectHole(8)">9</th>
+                  <th class="py-2 px-3 bg-black/30 min-w-[52px]">OUT</th>
+                </tr>
+                <tr id="out-yard-row" class="th-surface-sub text-[11px] font-semibold border-b"></tr>
+                <tr id="out-par-row" class="th-badge font-bold border-b"></tr>
+              </thead>
+              <tbody id="out-score-body" class="divide-y divide-gray-200"></tbody>
+            </table>
+          </div>
+
+          <!-- IN (10-18H) テーブル -->
+          <div class="overflow-x-auto border-t-2" style="border-color: var(--bg-header);">
+            <table class="w-full text-center border-collapse text-xs sm:text-sm">
+              <thead>
+                <tr class="th-header font-bold">
+                  <th class="py-2 px-3 text-left sticky left-0 th-header z-10 min-w-[110px]">HOLE (IN)</th>
+                  <th class="py-2 px-2 min-w-[36px] cursor-pointer hover:bg-white/10" onclick="selectHole(9)">10</th>
+                  <th class="py-2 px-2 min-w-[36px] cursor-pointer hover:bg-white/10" onclick="selectHole(10)">11</th>
+                  <th class="py-2 px-2 min-w-[36px] cursor-pointer hover:bg-white/10" onclick="selectHole(11)">12</th>
+                  <th class="py-2 px-2 min-w-[36px] cursor-pointer hover:bg-white/10" onclick="selectHole(12)">13</th>
+                  <th class="py-2 px-2 min-w-[36px] cursor-pointer hover:bg-white/10" onclick="selectHole(13)">14</th>
+                  <th class="py-2 px-2 min-w-[36px] cursor-pointer hover:bg-white/10" onclick="selectHole(14)">15</th>
+                  <th class="py-2 px-2 min-w-[36px] cursor-pointer hover:bg-white/10" onclick="selectHole(15)">16</th>
+                  <th class="py-2 px-2 min-w-[36px] cursor-pointer hover:bg-white/10" onclick="selectHole(16)">17</th>
+                  <th class="py-2 px-2 min-w-[36px] cursor-pointer hover:bg-white/10" onclick="selectHole(17)">18</th>
+                  <th class="py-2 px-3 bg-black/30 min-w-[52px]">IN</th>
+                  <th class="py-2 px-3 bg-black/50 th-accent-text min-w-[60px]">TOTAL</th>
+                </tr>
+                <tr id="in-yard-row" class="th-surface-sub text-[11px] font-semibold border-b"></tr>
+                <tr id="in-par-row" class="th-badge font-bold border-b"></tr>
+              </thead>
+              <tbody id="in-score-body" class="divide-y divide-gray-200"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==========================================
+           TAB 2: コースマップ・GPS距離計測・航空写真＆高低差
+           ========================================== -->
+      <div id="view-coursemap" class="tab-view hidden space-y-3.5">
+
+        <!-- マップモード切替バー -->
+        <div class="th-surface rounded-2xl p-3 shadow-xs border flex flex-wrap items-center justify-between gap-2.5">
+          <div class="th-surface-sub p-1 rounded-xl border flex text-xs font-extrabold">
+            <button onclick="setMapViewMode('illustration')" id="btn-mode-illustration" class="px-3 py-2 rounded-lg th-header shadow-xs transition flex items-center gap-1.5">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M17 7h4v4"/></svg>
+              <span>戦略レイアウト＆高低差</span>
+            </button>
+            <button onclick="setMapViewMode('satellite')" id="btn-mode-satellite" class="px-3 py-2 rounded-lg hover:bg-black/5 transition flex items-center gap-1.5">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+              <span>GPS距離・航空写真(全国)</span>
+            </button>
+          </div>
+
+          <!-- ホール前後切替 -->
+          <div class="flex items-center gap-2">
+            <button onclick="changeHole(-1)" class="w-9 h-9 rounded-xl th-surface-sub font-bold border">‹</button>
+            <div class="px-1.5 text-center">
+              <div id="map-header-hole" class="font-black text-sm leading-none">HOLE 1 • PAR 4</div>
+              <div id="map-header-sub" class="text-[11px] th-muted font-semibold mt-0.5">395 YD • HDCP 7</div>
+            </div>
+            <button onclick="changeHole(1)" class="w-9 h-9 rounded-xl th-surface-sub font-bold border">›</button>
+          </div>
+        </div>
+
+        <!-- =====================================
+             サブビュー A: 戦略レイアウト＆高低差断面モード
+             ===================================== -->
+        <div id="subview-illustration" class="phone-grid-1 grid grid-cols-1 lg:grid-cols-12 gap-4">
+          <!-- 左側：インタラクティブコースレイアウトSVG -->
+          <div class="lg:col-span-6 th-surface rounded-2xl p-3.5 shadow-xs border flex flex-col">
+            <div class="flex items-center justify-between gap-2 mb-2.5">
+              <span class="text-xs font-bold flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-full inline-block" style="background-color: var(--accent-primary);"></span>
+                マップをタップしてレイアップ距離計測
+              </span>
+              <button onclick="resetIllustrationTarget()" class="text-xs font-bold th-dark-panel px-2.5 py-1.5 rounded-lg hover:opacity-90 transition">
+                IP推奨位置へ
+              </button>
+            </div>
+
+            <div class="relative w-full aspect-[3/4] max-h-[500px] mx-auto rounded-2xl overflow-hidden border-2 shadow-inner" style="border-color: var(--border-dark); background-color: var(--svg-rough);">
+              <svg id="course-svg" viewBox="0 0 360 480" class="w-full h-full cursor-crosshair select-none touch-manipulation"></svg>
+              <div class="absolute top-3 left-3 bg-black/75 backdrop-blur-xs text-white px-2.5 py-1.5 rounded-lg text-[11px] font-bold flex items-center gap-1.5 pointer-events-none">
+                <span class="th-accent-text">▲ N</span>
+                <span class="text-white/40">|</span>
+                <span id="map-pin-badge">ピン: センター</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 右側：高低差断面図・距離計・マネジメント攻略 -->
+          <div class="lg:col-span-6 space-y-3.5">
+            <div class="th-dark-panel rounded-2xl p-4 shadow-md border">
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-bold uppercase tracking-wider th-accent-text flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full live-dot" style="background-color: var(--accent-highlight);"></span>
+                  DISTANCE & SLOPE / 距離・高低差
+                </span>
+                <span id="illus-elev-summary" class="text-[11px] font-extrabold px-2.5 py-0.5 rounded bg-black/30 text-amber-200 border border-white/15">
+                  全体高低差: -12m
+                </span>
+              </div>
+
+              <div class="grid grid-cols-2 gap-2.5 mb-3">
+                <div class="th-darker-box rounded-xl p-3 border">
+                  <div class="text-[11px] th-muted-dark font-semibold">TEE ➔ 着弾/IP地点</div>
+                  <div class="flex items-baseline gap-1 mt-1">
+                    <span id="dist-from-tee" class="text-2xl sm:text-3xl font-black th-accent-text">225</span>
+                    <span class="text-xs font-bold th-muted-dark">YD</span>
+                    <span id="slope-leg1" class="text-[11px] font-bold text-amber-200 ml-auto">(-8m)</span>
+                  </div>
+                  <div id="club-suggestion-1" class="text-[11px] text-white font-semibold mt-1">推奨: 1W (ドライバー)</div>
+                </div>
+
+                <div class="th-darker-box rounded-xl p-3 border">
+                  <div class="text-[11px] th-muted-dark font-semibold">着弾地点 ➔ PIN（実質）</div>
+                  <div class="flex items-baseline gap-1 mt-1">
+                    <span id="dist-to-pin-adjusted" class="text-2xl sm:text-3xl font-black text-white">166</span>
+                    <span class="text-xs font-bold th-muted-dark">YD</span>
+                    <span id="dist-to-pin-raw" class="text-[11px] th-muted-dark ml-auto">(実測 170y)</span>
+                  </div>
+                  <div id="club-suggestion-2" class="text-[11px] th-accent-text font-semibold mt-1">推奨: 6I / 7I</div>
+                </div>
+              </div>
+
+              <!-- 高低差断面図（Elevation Profile SVG） -->
+              <div class="th-darker-box rounded-xl p-3 border mb-3">
+                <div class="flex items-center justify-between text-[11px] th-muted-dark font-bold mb-1">
+                  <span class="inline-flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 18l6-9 4 5 4-7 4 11H3z"/></svg>
+                    ホール高低差断面図
+                  </span>
+                  <span id="target-elev-diff" class="th-accent-text">着弾: -8m / PIN: -12m</span>
+                </div>
+                <svg id="elevation-svg" viewBox="0 0 340 86" class="w-full h-20 overflow-visible"></svg>
+              </div>
+
+              <!-- ピンポジション切替 -->
+              <div class="grid grid-cols-3 gap-2">
+                <button onclick="setPinPosition('front')" id="pin-btn-front" class="pin-btn py-1.5 rounded-xl text-xs font-bold border border-white/20 bg-white/10 text-white transition">手前 (-12y)</button>
+                <button onclick="setPinPosition('center')" id="pin-btn-center" class="pin-btn py-1.5 rounded-xl text-xs font-bold th-accent-btn border border-white/30 transition">センター</button>
+                <button onclick="setPinPosition('back')" id="pin-btn-back" class="pin-btn py-1.5 rounded-xl text-xs font-bold border border-white/20 bg-white/10 text-white transition">奥 (+13y)</button>
+              </div>
+            </div>
+
+            <!-- ホール攻略＆コースマネジメントパネル -->
+            <div class="th-surface rounded-2xl p-4 shadow-xs border space-y-3">
+              <h3 class="font-extrabold text-sm flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+                コースマネジメント・攻略ポイント
+              </h3>
+              <div class="phone-grid-1 grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+                <div class="th-surface-sub border rounded-xl p-3">
+                  <div class="font-extrabold mb-1">ティーショットの狙い目</div>
+                  <p id="mgmt-tee-tip" class="th-muted leading-relaxed"></p>
+                </div>
+                <div class="th-surface-sub border rounded-xl p-3">
+                  <div class="font-extrabold mb-1">セカンド・グリーン攻略</div>
+                  <p id="mgmt-green-tip" class="th-muted leading-relaxed"></p>
+                </div>
+              </div>
+              <div class="bg-red-50/90 border border-red-200 rounded-xl p-2.5 text-xs flex items-start gap-2">
+                <span class="font-black text-red-700 shrink-0 tracking-wider">CAUTION</span>
+                <span id="mgmt-danger-tip" class="text-red-900 font-medium"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- =====================================
+             サブビュー B: GPSリアルタイム距離計測 & 航空写真マップ（全国対応）
+             ===================================== -->
+        <div id="subview-satellite" class="hidden space-y-3.5">
+
+          <!-- 1. GPSリアルタイム距離計測パネル -->
+          <div class="th-dark-panel rounded-2xl p-4 shadow-md border space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div class="flex items-center gap-2.5">
+                <span class="w-8 h-8 rounded-xl bg-violet-600 text-white flex items-center justify-center shadow">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+                </span>
+                <div>
+                  <h3 class="font-extrabold text-sm sm:text-base leading-tight">GPS リアルタイム距離計測（現在地 ➔ グリーン）</h3>
+                  <p id="gps-status-text" class="text-[11px] th-muted-dark">「GPS測位開始」を押すと現在地からピンまでの実測ヤードを自動追尾します</p>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <button onclick="toggleGpsTracking()" id="btn-gps-toggle" class="bg-violet-600 hover:bg-violet-500 text-white font-extrabold text-xs px-3.5 py-2 rounded-xl shadow flex items-center gap-1.5 transition active:scale-95">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 010 8.49m-8.48-.01a6 6 0 010-8.49m11.31-2.82a10 10 0 010 14.14m-14.14 0a10 10 0 010-14.14"/></svg>
+                  <span id="btn-gps-label">GPS測位開始</span>
+                </button>
+                <button onclick="recordShotOriginFromGps()" id="btn-record-shot" class="bg-white/15 hover:bg-white/25 text-white font-bold text-xs px-3 py-2 rounded-xl border border-white/20 flex items-center gap-1.5 transition active:scale-95 disabled:opacity-40" disabled>
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+                  <span>打点記録</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- GPS計測数値カード -->
+            <div class="grid grid-cols-3 gap-2">
+              <div class="th-darker-box rounded-xl p-2.5 border text-center">
+                <div class="text-[10px] th-muted-dark font-bold">現在地 ➔ GREEN</div>
+                <div class="flex items-baseline justify-center gap-1 mt-0.5">
+                  <span id="gps-to-green-yd" class="text-2xl sm:text-3xl font-black text-violet-300">---</span>
+                  <span class="text-[10px] th-muted-dark">YD</span>
+                </div>
+                <div id="gps-to-green-adj" class="text-[10px] th-accent-text font-bold mt-0.5">高低差込み: ---</div>
+              </div>
+
+              <div class="th-darker-box rounded-xl p-2.5 border text-center">
+                <div class="text-[10px] th-muted-dark font-bold">現在地 ➔ IP地点</div>
+                <div class="flex items-baseline justify-center gap-1 mt-0.5">
+                  <span id="gps-to-ip-yd" class="text-2xl sm:text-3xl font-black text-white">---</span>
+                  <span class="text-[10px] th-muted-dark">YD</span>
+                </div>
+                <div id="gps-rec-club" class="text-[10px] text-amber-200 font-bold mt-0.5">推奨: ---</div>
+              </div>
+
+              <div class="th-darker-box rounded-xl p-2.5 border text-center">
+                <div class="text-[10px] th-muted-dark font-bold">ショット飛距離</div>
+                <div class="flex items-baseline justify-center gap-1 mt-0.5">
+                  <span id="gps-shot-yd" class="text-2xl sm:text-3xl font-black th-accent-text">---</span>
+                  <span class="text-[10px] th-muted-dark">YD</span>
+                </div>
+                <div id="gps-accuracy-label" class="text-[10px] th-muted-dark mt-0.5">精度: 未測位</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. 日本全国ゴルフ場検索＆クイックジャンプ -->
+          <div class="th-surface rounded-2xl p-3.5 shadow-xs border space-y-2.5">
+            <div class="flex flex-col sm:flex-row gap-2">
+              <input id="golf-search-input" type="text" placeholder="日本全国のゴルフ場名で航空写真検索（例：平塚富士見CC、川奈ホテルGC...）" class="flex-1 rounded-xl th-surface-sub border px-3.5 py-2 text-xs sm:text-sm font-semibold focus:outline-none" onkeydown="if(event.key==='Enter') searchJapanGolfCourse()" />
+              <button onclick="searchJapanGolfCourse()" id="btn-golf-search" class="th-accent-btn font-extrabold text-xs px-4 py-2 rounded-xl shadow flex items-center justify-center gap-1.5 transition active:scale-95 shrink-0">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+                <span>航空写真検索</span>
+              </button>
+            </div>
+
+            <div id="search-results-box" class="hidden th-dark-panel rounded-xl p-2 space-y-1 max-h-40 overflow-y-auto"></div>
+
+            <div id="quick-courses-bar" class="flex gap-1.5 overflow-x-auto no-scrollbar pb-0.5"></div>
+          </div>
+
+          <!-- 3. Leaflet 航空写真マップ & 3点実測 -->
+          <div class="phone-grid-1 grid grid-cols-1 lg:grid-cols-12 gap-3.5">
+            <div class="lg:col-span-7 th-surface rounded-2xl p-3 shadow-xs border flex flex-col gap-2">
+              <div class="flex flex-wrap items-center justify-between gap-1.5">
+                <div class="flex items-center gap-1 th-surface-sub p-1 rounded-xl border text-[11px] font-bold">
+                  <button onclick="setPlacementTarget('tee')" id="place-btn-tee" class="px-2.5 py-1 rounded-lg bg-red-600 text-white shadow-xs transition flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-white inline-block"></span>1.TEE</button>
+                  <button onclick="setPlacementTarget('ip')" id="place-btn-ip" class="px-2.5 py-1 rounded-lg hover:bg-black/5 transition flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-blue-600 inline-block"></span>2.IP</button>
+                  <button onclick="setPlacementTarget('green')" id="place-btn-green" class="px-2.5 py-1 rounded-lg hover:bg-black/5 transition flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-600 inline-block"></span>3.PIN</button>
+                </div>
+
+                <select id="tile-layer-select" onchange="switchLeafletLayer(this.value)" class="th-surface-sub text-xs font-bold rounded-lg px-2 py-1.5 border focus:outline-none">
+                  <option value="photo" selected>地理院 航空写真</option>
+                  <option value="std">地理院 標準地図</option>
+                  <option value="pale">地理院 淡色地図</option>
+                </select>
+              </div>
+
+              <div class="relative w-full h-[360px] sm:h-[430px] rounded-2xl overflow-hidden border shadow-inner" style="border-color: var(--border-main);">
+                <div id="leaflet-map" class="w-full h-full"></div>
+              </div>
+            </div>
+
+            <!-- 右側：航空写真3点計測・標高差保存 -->
+            <div class="lg:col-span-5 th-dark-panel rounded-2xl p-4 shadow-md border flex flex-col justify-between space-y-3">
+              <div class="space-y-3">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold uppercase tracking-wider th-accent-text">AERIAL 3-POINT MEASURE</span>
+                  <span id="gsi-api-status" class="text-[10px] font-bold px-2 py-0.5 rounded bg-white/10 th-muted-dark">標高API 待機中</span>
+                </div>
+
+                <div class="th-darker-box rounded-xl p-3 border flex items-center justify-between">
+                  <div>
+                    <div class="text-[11px] th-muted-dark font-semibold">TEE ➔ GREEN 総距離</div>
+                    <div class="flex items-baseline gap-1.5 mt-0.5">
+                      <span id="sat-total-yd" class="text-3xl font-black text-white">388</span>
+                      <span class="text-xs font-bold th-muted-dark">YD</span>
+                    </div>
+                  </div>
+                  <div class="text-right">
+                    <div class="text-[11px] th-muted-dark font-semibold">全体高低差</div>
+                    <div id="sat-total-elev-diff" class="text-lg font-black th-accent-text mt-0.5">-14.2m</div>
+                    <div id="sat-elev-raw" class="text-[10px] th-muted-dark">Tee: 48.5m → Grn: 34.3m</div>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                  <div class="bg-white/10 rounded-xl p-2.5 border border-white/10">
+                    <div class="text-[10px] font-bold text-amber-200 flex items-center gap-1">
+                      <span class="w-2 h-2 rounded-full bg-red-500 inline-block"></span>TEE ➔ <span class="w-2 h-2 rounded-full bg-blue-500 inline-block"></span>IP地点
+                    </div>
+                    <div class="flex items-baseline gap-1 mt-0.5">
+                      <span id="sat-leg1-yd" class="text-xl font-black text-white">232</span>
+                      <span class="text-[10px] th-muted-dark">YD</span>
+                    </div>
+                    <div id="sat-leg1-slope" class="text-[10px] th-muted-dark mt-0.5">高低差 -9.5m (実質 222y)</div>
+                    <div id="sat-leg1-club" class="text-[11px] th-accent-text font-bold mt-0.5">推奨: 1W</div>
+                  </div>
+
+                  <div class="bg-white/10 rounded-xl p-2.5 border border-white/10">
+                    <div class="text-[10px] font-bold text-amber-200 flex items-center gap-1">
+                      <span class="w-2 h-2 rounded-full bg-blue-500 inline-block"></span>IP ➔ <span class="w-2 h-2 rounded-full bg-amber-500 inline-block"></span>GREEN
+                    </div>
+                    <div class="flex items-baseline gap-1 mt-0.5">
+                      <span id="sat-leg2-yd" class="text-xl font-black text-white">158</span>
+                      <span class="text-[10px] th-muted-dark">YD</span>
+                    </div>
+                    <div id="sat-leg2-slope" class="text-[10px] th-muted-dark mt-0.5">高低差 -4.7m (実質 153y)</div>
+                    <div id="sat-leg2-club" class="text-[11px] th-accent-text font-bold mt-0.5">推奨: 7I / 8I</div>
+                  </div>
+                </div>
+              </div>
+
+              <button onclick="applySatelliteDataToHole()" class="w-full th-accent-btn font-extrabold text-xs py-3 px-4 rounded-xl shadow flex items-center justify-center gap-1.5 transition active:scale-95">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                この実測距離・標高差を「HOLE <span id="sat-apply-hole-num">1</span>」に反映
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==========================================
+           TAB 3: コンペ・リーダーボード (LEADERBOARD)
+           ========================================== -->
+      <div id="view-leaderboard" class="tab-view hidden space-y-3.5">
+
+        <div class="th-surface rounded-2xl p-4 shadow-xs border flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="font-extrabold text-base sm:text-lg">リアルタイム・リーダーボード</h2>
+              <span class="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full th-badge border">
+                <span class="w-1.5 h-1.5 rounded-full live-dot" style="background-color: var(--accent-primary);"></span> LIVE集計
+              </span>
+            </div>
+            <p class="text-xs th-muted mt-0.5">プレイヤー名・チーム・ハンデを自由に設定 ／ 変更すると順位が即座に再計算されます</p>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2">
+            <!-- 集計方式切替：新ペリア（自動） / 個人ハンデ戦（手動マイナス） / グロス / チーム対抗戦 -->
+            <div class="th-surface-sub p-1 rounded-xl border flex flex-wrap text-xs font-bold gap-0.5">
+              <button onclick="setRankingMode('net')" id="rank-mode-net" class="px-2.5 py-1.5 rounded-lg th-header shadow-xs transition">新ペリア (自動)</button>
+              <button onclick="setRankingMode('manual')" id="rank-mode-manual" class="px-2.5 py-1.5 rounded-lg hover:bg-black/5 transition">個人ハンデ戦 (指定−)</button>
+              <button onclick="setRankingMode('gross')" id="rank-mode-gross" class="px-2.5 py-1.5 rounded-lg hover:bg-black/5 transition">グロス順</button>
+              <button onclick="setRankingMode('team')" id="rank-mode-team" class="px-2.5 py-1.5 rounded-lg hover:bg-black/5 transition">チーム対抗戦</button>
+            </div>
+            <button onclick="addNewPlayerRow()" class="th-dark-panel text-xs font-bold px-3 py-2 rounded-xl shadow-xs transition active:scale-95">
+              ＋ 参加者追加
+            </button>
+            <button onclick="openShareModal()" class="th-accent-btn text-xs font-bold px-3.5 py-2 rounded-xl shadow-xs transition active:scale-95">
+              順位表を共有
+            </button>
+          </div>
+        </div>
+
+        <!-- 新ペリア説明バナー -->
+        <div id="shinperia-banner" class="th-dark-panel rounded-xl px-4 py-2.5 text-xs flex flex-wrap items-center justify-between gap-2">
+          <div class="flex items-center gap-2">
+            <span class="th-accent-btn font-black px-2 py-0.5 rounded text-[10px]">新ペリア集計</span>
+            <span>隠しホール（12H）からハンディキャップを自動算出中</span>
+          </div>
+          <span class="th-muted-dark font-mono text-[11px]">HDCP上限: 36.0 / ダブルパーカット</span>
+        </div>
+
+        <!-- 個人ハンデ戦（手動マイナス打数）操作バナー -->
+        <div id="manual-hdcp-banner" class="hidden th-dark-panel rounded-xl px-4 py-3 text-xs flex flex-wrap items-center justify-between gap-2 border">
+          <div class="flex items-center gap-2">
+            <span class="th-accent-btn font-black px-2 py-0.5 rounded text-[10px]">個人ハンデ戦</span>
+            <span>各プレイヤーの <strong>− / ＋</strong> または数値欄で<strong>マイナス打数（例: −10打）</strong>を自由に指定できます</span>
+          </div>
+          <button onclick="resetAllManualHandicaps()" class="bg-white/15 hover:bg-white/25 text-white font-bold px-2.5 py-1 rounded-lg border border-white/20 text-[11px] transition active:scale-95">
+            全員 0打にリセット
+          </button>
+        </div>
+
+        <!-- チーム対抗戦 操作・順位サマリーパネル -->
+        <div id="team-battle-panel" class="hidden space-y-3">
+          <div class="th-dark-panel rounded-xl px-4 py-3 text-xs flex flex-wrap items-center justify-between gap-2 border">
+            <div class="flex items-center gap-2">
+              <span class="th-accent-btn font-black px-2 py-0.5 rounded text-[10px]">チーム対抗戦</span>
+              <span>カートの組に関係なく、下の表から各人の<strong>所属チーム</strong>を自由に編成できます</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="th-muted-dark font-bold">チーム集計基準:</span>
+              <select id="team-scoring-basis" onchange="setTeamScoringBasis(this.value)" class="bg-black/35 text-white border border-white/20 rounded-lg px-2 py-1 text-xs font-bold focus:outline-none">
+                <option value="manual" class="text-black">個人ハンデ戦 NET</option>
+                <option value="net" class="text-black">新ペリア NET</option>
+                <option value="gross" class="text-black">GROSS（グロス）</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- チーム別順位カード一覧 -->
+          <div id="team-standings-cards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5"></div>
+        </div>
+
+        <div class="th-surface rounded-2xl shadow-xs border overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs sm:text-sm">
+              <thead>
+                <tr class="th-header font-bold border-b">
+                  <th class="py-3 px-2.5 text-center w-11">順位</th>
+                  <th class="py-3 px-2.5 min-w-[140px]">プレイヤー名 / 組</th>
+                  <th id="leaderboard-team-col-header" class="py-3 px-2 text-center min-w-[105px]">チーム</th>
+                  <th class="py-3 px-2 text-center">THRU</th>
+                  <th class="py-3 px-2 text-center">OUT</th>
+                  <th class="py-3 px-2 text-center">IN</th>
+                  <th class="py-3 px-2 text-center">GROSS</th>
+                  <th id="leaderboard-hdcp-col-header" class="py-3 px-2 text-center min-w-[115px]">HDCP</th>
+                  <th class="py-3 px-3 text-center bg-black/30 th-accent-text">NET</th>
+                </tr>
+              </thead>
+              <tbody id="leaderboard-body" class="divide-y divide-gray-200"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==========================================
+           TAB 4: 過去のスコア記録・戦績アーカイブ (HISTORY)
+           ========================================== -->
+      <div id="view-history" class="tab-view hidden space-y-3.5">
+        <!-- ヘッダー & 今回のラウンド保存アクション -->
+        <div class="th-surface rounded-2xl p-4 sm:p-5 shadow-xs border flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="font-extrabold text-base sm:text-lg">マイ・ラウンド戦績 & 過去スコア記録</h2>
+              <span class="text-[11px] font-bold px-2 py-0.5 rounded-full th-badge border">自動保存</span>
+            </div>
+            <p class="text-xs th-muted mt-0.5">これまでのスコア推移・平均スコアの確認や、過去のスコア手入力登録ができます</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button onclick="saveCurrentRoundToHistory()" class="th-accent-btn font-extrabold text-xs px-3.5 py-2.5 rounded-xl shadow flex items-center gap-1.5 transition active:scale-95">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+              <span>現在のスコアを履歴に保存</span>
+            </button>
+            <button onclick="toggleManualHistoryForm()" class="th-dark-panel font-bold text-xs px-3.5 py-2.5 rounded-xl shadow flex items-center gap-1.5 transition active:scale-95">
+              <span>＋</span> 過去スコアを追加
+            </button>
+          </div>
+        </div>
+
+        <!-- 過去スコア手動追加フォーム（開閉式） -->
+        <div id="manual-history-form" class="hidden th-dark-panel rounded-2xl p-4 shadow-md border space-y-3">
+          <div class="flex items-center justify-between border-b border-white/15 pb-2">
+            <h3 class="font-extrabold text-sm th-accent-text">過去のラウンド記録を手入力で追加</h3>
+            <button onclick="toggleManualHistoryForm()" class="th-muted-dark hover:text-white text-lg leading-none px-1">×</button>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-6 gap-2.5 text-xs">
+            <div class="col-span-2 sm:col-span-1">
+              <label class="block text-[10px] th-muted-dark font-bold mb-1">プレー日</label>
+              <input id="hist-input-date" type="date" class="w-full rounded-lg bg-white text-gray-900 px-2.5 py-2 font-semibold" />
+            </div>
+            <div class="col-span-2 sm:col-span-2">
+              <label class="block text-[10px] th-muted-dark font-bold mb-1">ゴルフ場名</label>
+              <input id="hist-input-course" type="text" placeholder="例：平塚富士見CC" class="w-full rounded-lg bg-white text-gray-900 px-2.5 py-2 font-semibold" />
+            </div>
+            <div>
+              <label class="block text-[10px] th-muted-dark font-bold mb-1">OUT</label>
+              <input id="hist-input-out" type="number" min="25" max="90" value="44" class="w-full rounded-lg bg-white text-gray-900 px-2.5 py-2 font-bold text-center" />
+            </div>
+            <div>
+              <label class="block text-[10px] th-muted-dark font-bold mb-1">IN</label>
+              <input id="hist-input-in" type="number" min="25" max="90" value="45" class="w-full rounded-lg bg-white text-gray-900 px-2.5 py-2 font-bold text-center" />
+            </div>
+            <div>
+              <label class="block text-[10px] th-muted-dark font-bold mb-1">総パット数</label>
+              <input id="hist-input-putts" type="number" min="18" max="60" value="34" class="w-full rounded-lg bg-white text-gray-900 px-2.5 py-2 font-bold text-center" />
+            </div>
+          </div>
+          <div class="flex flex-col sm:flex-row gap-2">
+            <input id="hist-input-memo" type="text" placeholder="メモ（天候・使用ティー・同伴者や振り返りなど）" class="flex-1 rounded-lg bg-white text-gray-900 px-3 py-2 text-xs font-medium" />
+            <button onclick="addManualHistoryRecord()" class="th-accent-btn font-extrabold text-xs px-5 py-2 rounded-xl shadow shrink-0 transition active:scale-95">
+              記録を登録する
+            </button>
+          </div>
+        </div>
+
+        <!-- 戦績サマリーカード（4指標） -->
+        <div id="history-summary-cards" class="grid grid-cols-2 sm:grid-cols-4 gap-2.5"></div>
+
+        <!-- スコア推移ミニグラフ（直近ラウンド） -->
+        <div class="th-surface rounded-2xl p-4 shadow-xs border">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="font-extrabold text-xs sm:text-sm flex items-center gap-1.5">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 3 5-6"/></svg>
+              <span>スコア推移トレンド（直近ラウンド）</span>
+            </h3>
+            <span id="history-trend-badge" class="text-[11px] font-bold th-badge px-2 py-0.5 rounded-full border">平均更新中</span>
+          </div>
+          <div class="w-full overflow-x-auto">
+            <svg id="history-trend-svg" viewBox="0 0 600 135" class="w-full h-32 min-w-[340px]"></svg>
+          </div>
+        </div>
+
+        <!-- 過去ラウンド履歴一覧リスト -->
+        <div class="th-surface rounded-2xl shadow-xs border overflow-hidden">
+          <div class="px-4 py-3 th-surface-sub border-b flex items-center justify-between">
+            <h3 class="font-extrabold text-xs sm:text-sm">ラウンド履歴一覧</h3>
+            <span id="history-count-label" class="text-xs font-bold th-muted">全 0 ラウンド</span>
+          </div>
+          <div id="history-records-list" class="divide-y divide-gray-200"></div>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- モバイル用ボトムナビゲーションバー（実機モバイル & スマホプレビュー共通） -->
+    <nav class="mobile-bottom-nav md:hidden fixed bottom-0 inset-x-0 th-header border-t z-40 shadow-2xl">
+      <div class="grid grid-cols-4 h-16">
+        <button onclick="switchTab('scorecard')" data-tab="scorecard" class="nav-btn-mobile flex flex-col items-center justify-center gap-1 th-accent-text font-bold">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h8M8 15h5"/></svg>
+          <span class="text-[10px]">スコア入力</span>
+        </button>
+        <button onclick="switchTab('coursemap')" data-tab="coursemap" class="nav-btn-mobile flex flex-col items-center justify-center gap-1 th-muted-dark font-medium">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 21s-6-5.33-6-10a6 6 0 1112 0c0 4.67-6 10-6 10z"/><circle cx="12" cy="11" r="2.5"/></svg>
+          <span class="text-[10px]">GPS・マップ</span>
+        </button>
+        <button onclick="switchTab('leaderboard')" data-tab="leaderboard" class="nav-btn-mobile flex flex-col items-center justify-center gap-1 th-muted-dark font-medium">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 01-10 0V4z"/><path d="M7 6H4v2a3 3 0 003 3M17 6h3v2a3 3 0 01-3 3"/></svg>
+          <span class="text-[10px]">順位表</span>
+        </button>
+        <button onclick="switchTab('history')" data-tab="history" class="nav-btn-mobile flex flex-col items-center justify-center gap-1 th-muted-dark font-medium">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 3 5-6"/></svg>
+          <span class="text-[10px]">過去記録</span>
+        </button>
+      </div>
+    </nav>
+
+  </div>
+
+  <!-- ==========================================
+       モーダル 1: マイコース登録・JSONエクスポート/インポート
+       ========================================== -->
+  <div id="course-manager-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div class="th-surface rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl border">
+      <div class="th-header px-5 py-4 flex items-center justify-between">
+        <h3 class="font-bold text-base flex items-center gap-2">マイコース新規作成・コースデータ共有</h3>
+        <button onclick="closeCourseManagerModal()" class="th-muted-dark hover:text-white text-xl leading-none px-2">×</button>
+      </div>
+
+      <div class="p-5 space-y-4 max-h-[80vh] overflow-y-auto">
+        <div class="th-surface-sub p-3.5 rounded-xl border space-y-3">
+          <h4 class="font-extrabold text-xs">＋ 新しいゴルフ場を登録（全国のコースに対応）</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div>
+              <label class="block text-[11px] font-bold th-muted mb-1">ゴルフ場名</label>
+              <input id="new-course-name" type="text" placeholder="例：平塚富士見カントリークラブ" class="w-full rounded-lg border bg-white px-3 py-2 text-xs font-semibold" />
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold th-muted mb-1">コースタイプ</label>
+              <select id="new-course-type" class="w-full rounded-lg border bg-white px-3 py-2 text-xs font-semibold">
+                <option value="丘陵・山岳">丘陵・山岳</option>
+                <option value="シーサイド">シーサイド</option>
+                <option value="林間・フラット">林間・フラット</option>
+              </select>
+            </div>
+          </div>
+          <button onclick="createNewCustomCourse()" class="w-full th-header hover:opacity-90 font-bold text-xs py-2.5 rounded-xl transition">
+            このゴルフ場を新規作成して切り替える
+          </button>
+        </div>
+
+        <div class="space-y-2">
+          <h4 class="font-extrabold text-xs">現在のコースデータ（18H距離・標高・座標）の共有・復元</h4>
+          <div class="flex gap-2">
+            <button onclick="exportCurrentCourseJson()" class="flex-1 th-accent-btn font-extrabold text-xs py-2.5 px-3 rounded-xl transition">
+              コースJSONをコピー出力
+            </button>
+            <button onclick="importCourseFromJson()" class="flex-1 th-surface-sub font-bold text-xs py-2.5 px-3 rounded-xl border transition">
+              JSONからコース読込
+            </button>
+          </div>
+          <textarea id="course-json-box" rows="4" placeholder="ここにコースJSONデータが表示されます" class="w-full rounded-xl border th-surface-sub p-2.5 text-[11px] font-mono"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       モーダル 2: スコアシート・リーダーボード共有
+       ========================================== -->
+  <div id="share-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div class="th-surface rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl border">
+      <div class="th-header px-5 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <h3 class="font-bold text-base">コンペスコアシートを共有</h3>
+        </div>
+        <button onclick="closeShareModal()" class="th-muted-dark hover:text-white text-xl leading-none px-2">×</button>
+      </div>
+
+      <div class="p-5 space-y-4">
+        <p class="text-xs th-muted leading-relaxed">
+          現在のリーダーボード順位と第1組のスコア速報を、LINE・メール・チャット等にそのまま貼り付けて共有できます。
+        </p>
+
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-xs font-bold">共有テキストプレビュー</span>
+            <span class="text-[11px] font-semibold" style="color: var(--accent-primary);">リアルタイム反映済</span>
+          </div>
+          <textarea id="share-preview-text" readonly rows="9" class="w-full rounded-xl th-surface-sub border p-3 text-xs font-mono focus:outline-none"></textarea>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <button onclick="copyShareText()" class="th-accent-btn font-extrabold text-xs sm:text-sm py-3 px-4 rounded-xl shadow flex items-center justify-center gap-2 transition active:scale-95">
+            スコア速報テキストをコピー
+          </button>
+          <button onclick="copyShareUrl()" class="th-header font-bold text-xs sm:text-sm py-3 px-4 rounded-xl shadow flex items-center justify-center gap-2 transition active:scale-95">
+            共有リンクURLをコピー
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       モーダル 3: データリセット確認
+       ========================================== -->
+  <div id="reset-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div class="th-surface rounded-2xl max-w-sm w-full p-5 shadow-2xl border space-y-4">
+      <h3 class="font-bold text-base">スコア・コースデータを初期状態に戻しますか？</h3>
+      <p class="text-xs th-muted leading-relaxed">
+        これまでに入力したスコア・カスタムコース・メモをリセットし、初期のサンプルコンペデータに戻します。
+      </p>
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="closeResetConfirm()" class="px-4 py-2 rounded-xl text-xs font-bold th-surface-sub">キャンセル</button>
+        <button onclick="executeReset()" class="px-4 py-2 rounded-xl text-xs font-bold bg-red-600 text-white hover:bg-red-700">初期データに戻す</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // =========================================================================
+    // 1. 日本全国主要ゴルフ場クイックジャンプ座標データベース
+    // =========================================================================
+    const JAPAN_QUICK_COURSES = [
+      { name: '平塚富士見CC', lat: 35.3496, lon: 139.2981 },
+      { name: '川奈ホテルGC 富士', lat: 34.9508, lon: 139.1375 },
+      { name: '霞ヶ関カンツリー倶楽部', lat: 35.9189, lon: 139.4239 },
+      { name: '富士桜カントリー倶楽部', lat: 35.4628, lon: 138.7453 },
+      { name: '程ヶ谷カントリー倶楽部', lat: 35.4872, lon: 139.5206 },
+      { name: '相模原ゴルフクラブ', lat: 35.5186, lon: 139.3983 },
+      { name: '戸塚カントリー倶楽部', lat: 35.4481, lon: 139.5389 },
+      { name: '大箱根カントリークラブ', lat: 35.2636, lon: 139.0069 },
+      { name: '東京ゴルフ倶楽部', lat: 35.8628, lon: 139.4036 },
+      { name: '小樽カントリー倶楽部', lat: 43.1536, lon: 141.1583 },
+      { name: '札幌GC 輪厚', lat: 42.9469, lon: 141.5228 },
+      { name: '軽井沢72ゴルフ 北', lat: 36.3197, lon: 138.6131 },
+      { name: 'フェニックスCC', lat: 31.9589, lon: 131.4714 },
+      { name: '廣野ゴルフ倶楽部', lat: 34.7739, lon: 135.0394 },
+      { name: '鳴尾ゴルフ倶楽部', lat: 34.8639, lon: 135.3883 },
+      { name: '茨木カンツリー倶楽部', lat: 34.8328, lon: 135.5531 },
+      { name: '下関ゴルフ倶楽部', lat: 34.0114, lon: 130.9994 },
+      { name: '古賀ゴルフ・クラブ', lat: 33.7436, lon: 130.4669 },
+      { name: '芥屋ゴルフ倶楽部', lat: 33.5919, lon: 130.1061 },
+      { name: '琉球ゴルフ倶楽部', lat: 26.1558, lon: 127.7689 }
+    ];
+
+    // =========================================================================
+    // 2. プリセット3コース詳細データ（コースレイアウト・高低差・マネジメント）
+    // =========================================================================
+    function buildPresetCourses() {
+      const fujizakuraHoles = [
+        { hole: 1,  par: 4, hdcp: 7,  elevDiff: -12, yards: { back: 420, regular: 395, ladies: 340 }, shape: 'straight', dogleg: 0,   water: null, bunkers: [{x: 135, y: 245, r: 16}, {x: 225, y: 110, r: 15}], teeTip: '12mの打ち下ろしミドル。左バンカーを避けフェアウェイ右サイド狙い。', greenTip: '受けグリーンだが奥からは非常に速い。必ずピン手前からパットを。', danger: '左クロスバンカー（220yd付近）とグリーン奥のOBライン。' },
+        { hole: 2,  par: 5, hdcp: 3,  elevDiff: 14,  yards: { back: 555, regular: 520, ladies: 455 }, shape: 'dogleg-r', dogleg: 36,  water: {x: 245, y: 170, rx: 35, ry: 55}, teeTip: '緩やかな打ち上げの右ドッグレッグ。正面松の木左がベストライン。', greenTip: '3打目は打ち上げ計算で1クラブ大きめを選択。', danger: '右サイドの池とセカンド地点の右林。' },
+        { hole: 3,  par: 3, hdcp: 15, elevDiff: -16, yards: { back: 192, regular: 168, ladies: 135 }, shape: 'par3',     dogleg: 0,   water: {x: 110, y: 145, rx: 32, ry: 40}, teeTip: '16m打ち下ろしの名物ショート。実質距離は-15yd前後を見てクラブ選択。', greenTip: 'グリーン中央狙いが鉄則。左手前の池方向は絶対に避ける。', danger: 'グリーン左手前の池と強いアゲンストの風。' },
+        { hole: 4,  par: 4, hdcp: 1,  elevDiff: 18,  yards: { back: 448, regular: 418, ladies: 360 }, shape: 'dogleg-l', dogleg: -32, water: null, bunkers: [{x: 215, y: 230, r: 18}, {x: 145, y: 95, r: 16}], teeTip: '18m打ち上げの最難関ホール。フェアウェイ右半分に置いて2オン狙い。', greenTip: '2打目は実質+18ydの打ち上げ。花道から転がし上げも有効。', danger: '左ドッグレッグ内側の林と手前バンカー。' },
+        { hole: 5,  par: 4, hdcp: 11, elevDiff: -6,  yards: { back: 382, regular: 355, ladies: 305 }, shape: 'straight', dogleg: 0,   water: null, bunkers: [{x: 220, y: 105, r: 16}], teeTip: 'ドラコン推奨ホール。広々としたフェアウェイへ思い切りティーショットを。', greenTip: '2段グリーンのためピンと同じ段に乗せることが重要。', danger: 'グリーン右サイドのアゴが高いガードバンカー。' },
+        { hole: 6,  par: 3, hdcp: 17, elevDiff: 4,   yards: { back: 170, regular: 150, ladies: 122 }, shape: 'par3',     dogleg: 0,   water: null, bunkers: [{x: 135, y: 115, r: 18}, {x: 225, y: 115, r: 18}], teeTip: '両サイドをバンカーに囲まれたショート。キャリーでグリーン面へ。', greenTip: '傾斜が素直なのでセンターに乗せればバーディチャンス。', danger: '左右の深いガードバンカー。' },
+        { hole: 7,  par: 4, hdcp: 5,  elevDiff: -14, yards: { back: 430, regular: 400, ladies: 345 }, shape: 'dogleg-r', dogleg: 28,  water: null, bunkers: [{x: 140, y: 220, r: 16}], teeTip: '打ち下ろしの右ドッグレッグ。左クロスバンカーの右横がベスト。', greenTip: '縦長グリーンのためピン位置による番手選択を正確に。', danger: '右林越えショートカット失敗時のOB。' },
+        { hole: 8,  par: 5, hdcp: 9,  elevDiff: -4,  yards: { back: 535, regular: 502, ladies: 440 }, shape: 'straight', dogleg: 0,   water: {x: 120, y: 135, rx: 30, ry: 32}, teeTip: 'フェアウェイ左のOBを避け、センターから右サイドへ。', greenTip: '手前80ydのクリーク手前に刻み、得意距離からピンデッドに。', danger: 'グリーン左手前のクリーク（小川）。' },
+        { hole: 9,  par: 4, hdcp: 13, elevDiff: 10,  yards: { back: 405, regular: 378, ladies: 325 }, shape: 'straight', dogleg: 0,   water: null, bunkers: [{x: 145, y: 95, r: 16}, {x: 215, y: 95, r: 16}], teeTip: 'クラブハウスへ向かう打ち上げミドル。力まずフェアウェイキープ優先。', greenTip: '10m打ち上げのため1番手大きめでしっかり打つ。', danger: '花道を絞る左右のガードバンカー。' },
+        { hole: 10, par: 4, hdcp: 8,  elevDiff: -8,  yards: { back: 410, regular: 382, ladies: 330 }, shape: 'straight', dogleg: 0,   water: null, bunkers: [{x: 220, y: 240, r: 17}], teeTip: 'INのスタートは打ち下ろし。右バンカーの左を狙って好発進を。', greenTip: '奥から手前へ速い傾斜。手前から上りのパットを残したい。', danger: '右クロスバンカーとグリーン奥の斜面。' },
+        { hole: 11, par: 4, hdcp: 2,  elevDiff: 12,  yards: { back: 448, regular: 418, ladies: 362 }, shape: 'dogleg-l', dogleg: -35, water: {x: 115, y: 185, rx: 32, ry: 50}, teeTip: '左サイドの池がプレッシャーをかける難関ホール。右サイド安全ルート推奨。', greenTip: '無理な2オンより手前花道からの寄せワンパーも立派な戦略。', danger: '左サイド全域に広がる池ハザード。' },
+        { hole: 12, par: 3, hdcp: 16, elevDiff: -5,  yards: { back: 180, regular: 158, ladies: 128 }, shape: 'par3',     dogleg: 0,   water: null, bunkers: [{x: 180, y: 130, r: 22}], teeTip: 'ニアピン推奨ホール。手前の大きなバンカーを越えるキャリーが必須。', greenTip: 'グリーンは広めなのでピンを恐れずセンター狙い。', danger: 'グリーン正面を塞ぐ大きなアゴ高バンカー。' },
+        { hole: 13, par: 5, hdcp: 6,  elevDiff: -18, yards: { back: 560, regular: 525, ladies: 460 }, shape: 'dogleg-r', dogleg: 30,  water: null, bunkers: [{x: 145, y: 235, r: 16}, {x: 220, y: 100, r: 16}], teeTip: '富士山に向かって18m打ち下ろす絶景ロング！ドラコン推奨ホール。', greenTip: '2オン狙いはグリーン右バンカーに注意。左花道が安全。', danger: '右サイドのOBゾーンとグリーン右バンカー。' },
+        { hole: 14, par: 4, hdcp: 12, elevDiff: 6,   yards: { back: 372, regular: 345, ladies: 298 }, shape: 'straight', dogleg: 0,   water: null, bunkers: [{x: 140, y: 105, r: 16}], teeTip: '距離は短いがタイト。UTやフェアウェイウッドでのティーショットが有効。', greenTip: '砲台グリーンなのでしっかりキャリーで面に乗せる。', danger: '左右の松林に入ると横に出すだけになる。' },
+        { hole: 15, par: 4, hdcp: 4,  elevDiff: 15,  yards: { back: 435, regular: 405, ladies: 350 }, shape: 'dogleg-l', dogleg: -25, water: null, bunkers: [{x: 215, y: 215, r: 17}, {x: 215, y: 95, r: 15}], teeTip: '打ち上げの左ドッグレッグ。右バンカーの左裾狙いがベスト。', greenTip: '15m打ち上げのため2番手近く大きいクラブ選択も視野に。', danger: '左コーナーの林とショートによる手前バンカー。' },
+        { hole: 16, par: 3, hdcp: 18, elevDiff: -9,  yards: { back: 160, regular: 142, ladies: 115 }, shape: 'par3',     dogleg: 0,   water: {x: 235, y: 130, rx: 32, ry: 45}, teeTip: '右の池が美しいショート。左花道方向からフェードで攻めるのが理想。', greenTip: 'ピンが右の時は安全にグリーン左半分へ。', danger: 'グリーン右サイドの池とビーチバンカー。' },
+        { hole: 17, par: 4, hdcp: 10, elevDiff: 2,   yards: { back: 400, regular: 372, ladies: 320 }, shape: 'straight', dogleg: 0,   water: null, bunkers: [{x: 135, y: 230, r: 15}, {x: 225, y: 100, r: 16}], teeTip: 'フラットで美しい林間風ミドル。IPフラッグ方向へ正確に。', greenTip: 'アンジュレーションが強いので3パット注意。', danger: '230yd地点の左クロスバンカー。' },
+        { hole: 18, par: 5, hdcp: 14, elevDiff: -7,  yards: { back: 538, regular: 498, ladies: 435 }, shape: 'dogleg-r', dogleg: 26,  water: {x: 230, y: 125, rx: 36, ry: 48}, teeTip: '最終18番はドラマチックなロング。左サイドキープで2打目を有利に。', greenTip: 'グリーン右手前の池を避け、左花道からパー・バーディ締めを。', danger: 'グリーン右手前に口を開ける大きな池。' }
+      ];
+
+      const sagamiHoles = fujizakuraHoles.map((h) => ({
+        ...h,
+        elevDiff: Math.round(h.elevDiff * 0.45),
+        yards: { back: h.yards.back - 10, regular: h.yards.regular - 10, ladies: h.yards.ladies - 8 },
+        teeTip: `海風（サイド〜アゲンスト）の計算が鍵。低い弾道でフェアウェイキープを最優先。`,
+        greenTip: `高麗・ベント特有の海側への芝目に注意。手前から攻めるのがセオリー。`
+      }));
+
+      const shonanHoles = fujizakuraHoles.map((h, i) => ({
+        ...h,
+        elevDiff: (i % 3 === 0) ? 2 : (i % 3 === 1) ? -2 : 0,
+        yards: { back: h.yards.back - 18, regular: h.yards.regular - 15, ladies: h.yards.ladies - 12 },
+        teeTip: `高低差の少ないフラットなレイアウト。池とクリークの位置を確認して刻む距離を決定。`,
+        greenTip: `フラットな分、距離感が重要。ピン位置（手前・センター・奥）に合わせて正確に。`
+      }));
+
+      return [
+        {
+          id: 'preset_fujizakura',
+          name: '富士桜クラシックCC',
+          type: '丘陵・山岳',
+          courseRate: '73.2',
+          weather: '標高 1,050m ・ 晴れ 16℃ / 風: 北西 2m/s',
+          centerLat: 35.4628,
+          centerLon: 138.7453,
+          holes: fujizakuraHoles
+        },
+        {
+          id: 'preset_sagami',
+          name: '相模湾シーサイドGL',
+          type: 'シーサイド',
+          courseRate: '72.4',
+          weather: '海抜 25m ・ 晴れ 19℃ / 海風: 南東 4m/s',
+          centerLat: 34.9508,
+          centerLon: 139.1375,
+          holes: sagamiHoles
+        },
+        {
+          id: 'preset_shonan',
+          name: '湘南リバーサイドCC',
+          type: '林間・フラット',
+          courseRate: '71.1',
+          weather: '海抜 12m ・ 晴れ 20℃ / 風: 南 2m/s',
+          centerLat: 35.3496,
+          centerLon: 139.2981,
+          holes: shonanHoles
+        }
+      ];
+    }
+
+    const SHINPERIA_HIDDEN_HOLES = [1, 2, 4, 6, 7, 9, 10, 12, 13, 15, 16, 18];
+
+    // =========================================================================
+    // 3. アプリケーション状態管理
+    // =========================================================================
+    function createInitialState() {
+      const emptyScores = () => Array(18).fill(null);
+      return {
+        compName: '',
+        theme: 'earth', // 'earth' (ブラウン＆グレー) | 'masters' | 'turf' | 'contrast'
+        courses: buildPresetCourses(),
+        selectedCourseId: 'preset_fujizakura',
+        tee: 'regular',
+        currentHoleIndex: 0,
+        pinPosition: 'center',
+        rankingMode: 'net',
+        teamScoringBasis: 'manual', // 'manual' | 'net' | 'gross'
+        teams: [
+          { id: 'teamA', name: 'Aチーム', color: '#b84a39' },
+          { id: 'teamB', name: 'Bチーム', color: '#3b5e73' },
+          { id: 'teamC', name: 'Cチーム', color: '#5d645b' },
+          { id: 'teamD', name: 'Dチーム', color: '#8a6b3e' }
+        ],
+        mapViewMode: 'illustration',
+        mapTarget: { x: 180, y: 225 },
+        scoreHistory: [],
+        players: [
+          { id: 'p1', name: '', group: 1, teamId: 'teamA', isMyGroup: true, manualMinus: 0, scores: emptyScores(), putts: emptyScores(), fw: emptyScores() },
+          { id: 'p2', name: '', group: 1, teamId: 'teamB', isMyGroup: true, manualMinus: 0, scores: emptyScores(), putts: emptyScores(), fw: emptyScores() },
+          { id: 'p3', name: '', group: 1, teamId: 'teamA', isMyGroup: true, manualMinus: 0, scores: emptyScores(), putts: emptyScores(), fw: emptyScores() },
+          { id: 'p4', name: '', group: 1, teamId: 'teamB', isMyGroup: true, manualMinus: 0, scores: emptyScores(), putts: emptyScores(), fw: emptyScores() }
+        ]
+      };
+    }
+
+    const STORAGE_KEY = 'golfino_clean_v6';
+    let appState = loadState();
+
+    function loadState() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed && Array.isArray(parsed.courses) && Array.isArray(parsed.players)) {
+            return { ...createInitialState(), ...parsed };
+          }
+        }
+      } catch (e) {}
+      return createInitialState();
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+      } catch (e) {}
+    }
+
+    function getCurrentCourse() {
+      return appState.courses.find(c => c.id === appState.selectedCourseId) || appState.courses[0];
+    }
+
+    function getCurrentHole() {
+      const course = getCurrentCourse();
+      return course.holes[appState.currentHoleIndex] || course.holes[0];
+    }
+
+    let toastTimer = null;
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      const textEl = document.getElementById('toast-message');
+      if (!toast || !textEl) return;
+      textEl.textContent = msg;
+      toast.classList.remove('opacity-0', 'translate-y-[-8px]');
+      toast.classList.add('opacity-100', 'translate-y-0');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-[-8px]');
+        toast.classList.remove('opacity-100', 'translate-y-0');
+      }, 2800);
+    }
+
+    // =========================================================================
+    // 4. 過去スコア履歴管理
+    // =========================================================================
+    function toggleManualHistoryForm() {
+      const form = document.getElementById('manual-history-form');
+      if (!form) return;
+      form.classList.toggle('hidden');
+      const dateInput = document.getElementById('hist-input-date');
+      if (dateInput && !dateInput.value) {
+        dateInput.value = new Date().toISOString().slice(0, 10);
+      }
+    }
+
+    function saveCurrentRoundToHistory() {
+      const myPlayer = appState.players.find(p => p.id === 'p1') || appState.players[0];
+      const course = getCurrentCourse();
+      const holes = course.holes;
+
+      let outSum = 0, inSum = 0, outCount = 0, inCount = 0;
+      let puttSum = 0, puttCount = 0;
+      let fwHit = 0, fwTotal = 0;
+
+      myPlayer.scores.forEach((sc, idx) => {
+        if (typeof sc === 'number') {
+          if (idx < 9) { outSum += sc; outCount++; }
+          else { inSum += sc; inCount++; }
+        }
+        if (myPlayer.putts && typeof myPlayer.putts[idx] === 'number') {
+          puttSum += myPlayer.putts[idx];
+          puttCount++;
+        }
+        if (holes[idx].par > 3 && myPlayer.fw && typeof myPlayer.fw[idx] === 'boolean') {
+          fwTotal++;
+          if (myPlayer.fw[idx]) fwHit++;
+        }
+      });
+
+      const playedCount = outCount + inCount;
+      if (playedCount === 0) {
+        showToast('保存するスコアがまだ入力されていません');
+        return;
+      }
+
+      const todayStr = new Date().toISOString().slice(0, 10);
+      const totalPar = holes.reduce((s, h) => s + h.par, 0);
+      const totalScore = outSum + inSum;
+      const fwRate = fwTotal > 0 ? Math.round((fwHit / fwTotal) * 100) : null;
+      const roundLabel = (appState.compName || '').trim() || 'マイラウンド';
+
+      const record = {
+        id: 'hist_' + Date.now(),
+        date: todayStr,
+        courseName: course.name,
+        tee: appState.tee.toUpperCase(),
+        par: totalPar,
+        out: outCount > 0 ? outSum : '-',
+        in: inCount > 0 ? inSum : '-',
+        total: totalScore,
+        putts: puttCount > 0 ? puttSum : null,
+        fwKeepRate: fwRate,
+        memo: playedCount < 18
+          ? `${roundLabel}（${playedCount}H終了時点の途中記録）`
+          : `${roundLabel} 18H完走ラウンド`
+      };
+
+      appState.scoreHistory.unshift(record);
+      saveState();
+      renderScoreHistory();
+      showToast(`${course.name}（TOTAL ${totalScore}）を過去記録に保存しました！`);
+    }
+
+    function addManualHistoryRecord() {
+      const date = document.getElementById('hist-input-date').value || new Date().toISOString().slice(0, 10);
+      const courseName = document.getElementById('hist-input-course').value.trim();
+      const outVal = parseInt(document.getElementById('hist-input-out').value, 10);
+      const inVal = parseInt(document.getElementById('hist-input-in').value, 10);
+      const puttsVal = parseInt(document.getElementById('hist-input-putts').value, 10);
+      const memo = document.getElementById('hist-input-memo').value.trim();
+
+      if (!courseName) {
+        showToast('ゴルフ場名を入力してください');
+        return;
+      }
+      if (isNaN(outVal) || isNaN(inVal)) {
+        showToast('OUT と IN のスコアを正しく入力してください');
+        return;
+      }
+
+      appState.scoreHistory.unshift({
+        id: 'hist_' + Date.now(),
+        date,
+        courseName,
+        tee: 'REGULAR',
+        par: 72,
+        out: outVal,
+        in: inVal,
+        total: outVal + inVal,
+        putts: isNaN(puttsVal) ? null : puttsVal,
+        fwKeepRate: null,
+        memo: memo || '手入力ラウンド記録'
+      });
+
+      document.getElementById('hist-input-course').value = '';
+      document.getElementById('hist-input-memo').value = '';
+      document.getElementById('manual-history-form').classList.add('hidden');
+
+      saveState();
+      renderScoreHistory();
+      showToast(`「${courseName}」の記録を追加しました`);
+    }
+
+    function deleteHistoryRecord(id) {
+      appState.scoreHistory = appState.scoreHistory.filter(r => r.id !== id);
+      saveState();
+      renderScoreHistory();
+      showToast('履歴レコードを削除しました');
+    }
+
+    function renderScoreHistory() {
+      const listEl = document.getElementById('history-records-list');
+      const cardsEl = document.getElementById('history-summary-cards');
+      const countEl = document.getElementById('history-count-label');
+      if (!listEl || !cardsEl) return;
+
+      const records = appState.scoreHistory || [];
+      if (countEl) countEl.textContent = `全 ${records.length} ラウンド`;
+
+      const fullRounds = records.filter(r => typeof r.out === 'number' && typeof r.in === 'number');
+      const bestScore = fullRounds.length > 0 ? Math.min(...fullRounds.map(r => r.total)) : '-';
+      const avgScore = fullRounds.length > 0
+        ? (fullRounds.reduce((s, r) => s + r.total, 0) / fullRounds.length).toFixed(1)
+        : '-';
+      const puttRounds = fullRounds.filter(r => typeof r.putts === 'number');
+      const avgPutts = puttRounds.length > 0
+        ? (puttRounds.reduce((s, r) => s + r.putts, 0) / puttRounds.length).toFixed(1)
+        : '-';
+      const latestTotal = records.length > 0 ? records[0].total : '-';
+
+      cardsEl.innerHTML = `
+        <div class="th-surface rounded-2xl p-3.5 border shadow-xs">
+          <div class="text-[11px] font-bold th-muted">ベストスコア (18H)</div>
+          <div class="text-2xl font-black mt-1">${bestScore}</div>
+        </div>
+        <div class="th-surface rounded-2xl p-3.5 border shadow-xs">
+          <div class="text-[11px] font-bold th-muted">平均スコア (18H)</div>
+          <div class="text-2xl font-black mt-1">${avgScore}</div>
+        </div>
+        <div class="th-surface rounded-2xl p-3.5 border shadow-xs">
+          <div class="text-[11px] font-bold th-muted">平均パット数</div>
+          <div class="text-2xl font-black mt-1">${avgPutts}</div>
+        </div>
+        <div class="th-surface rounded-2xl p-3.5 border shadow-xs">
+          <div class="text-[11px] font-bold th-muted">直近ラウンド</div>
+          <div class="text-2xl font-black mt-1">${latestTotal}</div>
+        </div>
+      `;
+
+      renderHistoryTrendChart([...fullRounds].reverse().slice(-8));
+
+      if (records.length === 0) {
+        listEl.innerHTML = `
+          <div class="p-8 text-center text-xs th-muted">
+            まだ保存されたラウンド履歴はありません。「現在のスコアを履歴に保存」または「＋ 過去スコアを追加」から記録できます。
+          </div>
+        `;
+        return;
+      }
+
+      listEl.innerHTML = records.map(r => `
+        <div class="p-3.5 sm:p-4 flex flex-wrap items-center justify-between gap-2 bg-white hover:bg-gray-50 transition">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-[11px] font-bold px-2 py-0.5 rounded th-surface-sub border">${r.date}</span>
+              <span class="font-extrabold text-sm">${r.courseName}</span>
+            </div>
+            <div class="text-xs th-muted mt-1">
+              OUT: <strong>${r.out}</strong> / IN: <strong>${r.in}</strong>
+              ${r.putts !== null ? ` ・ PUTT: <strong>${r.putts}</strong>` : ''}
+              ${r.fwKeepRate !== null ? ` ・ FWキープ: <strong>${r.fwKeepRate}%</strong>` : ''}
+            </div>
+            ${r.memo ? `<div class="text-[11px] th-muted mt-0.5">${r.memo}</div>` : ''}
+          </div>
+          <div class="flex items-center gap-3 ml-auto">
+            <div class="text-right">
+              <div class="text-[10px] font-bold th-muted">TOTAL</div>
+              <div class="text-xl font-black">${r.total}</div>
+            </div>
+            <button onclick="deleteHistoryRecord('${r.id}')" class="text-xs th-muted hover:text-red-600 px-2 py-1 rounded">削除</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderHistoryTrendChart(chronologicalRecords) {
+      const svg = document.getElementById('history-trend-svg');
+      const badge = document.getElementById('history-trend-badge');
+      if (!svg) return;
+      if (chronologicalRecords.length === 0) {
+        if (badge) badge.textContent = 'データなし';
+        svg.innerHTML = `<text x="300" y="72" text-anchor="middle" fill="#6b7280" font-size="12" font-weight="700">ラウンド履歴が保存されるとここにスコア推移グラフが表示されます</text>`;
+        return;
+      }
+      if (badge) badge.textContent = `直近 ${chronologicalRecords.length} ラウンド`;
+
+      const scores = chronologicalRecords.map(r => r.total);
+      const minS = Math.min(...scores) - 4;
+      const maxS = Math.max(...scores) + 4;
+      const span = Math.max(10, maxS - minS);
+
+      const pts = chronologicalRecords.map((r, i) => {
+        const x = chronologicalRecords.length === 1 ? 300 : 50 + (500 * i) / (chronologicalRecords.length - 1);
+        const y = 105 - ((r.total - minS) / span) * 75;
+        return { x, y, total: r.total, date: r.date.slice(5) };
+      });
+
+      const polyline = pts.map(p => `${p.x},${p.y}`).join(' ');
+      const dots = pts.map(p => `
+        <circle cx="${p.x}" cy="${p.y}" r="4.5" fill="var(--accent-primary)" stroke="#ffffff" stroke-width="2" />
+        <text x="${p.x}" y="${p.y - 9}" text-anchor="middle" fill="var(--text-main)" font-size="11" font-weight="800">${p.total}</text>
+        <text x="${p.x}" y="126" text-anchor="middle" fill="var(--text-sub)" font-size="10" font-weight="600">${p.date}</text>
+      `).join('');
+
+      svg.innerHTML = `
+        <line x1="30" y1="110" x2="570" y2="110" stroke="var(--border-main)" stroke-width="1" />
+        <polyline fill="none" stroke="var(--accent-primary)" stroke-width="2.5" points="${polyline}" />
+        ${dots}
+      `;
+    }
+
+    // =========================================================================
+    // 5. 航空写真・GPS距離計測・標高差状態管理
+    // =========================================================================
+    let leafletMap = null;
+    let leafletTileLayer = null;
+    let teeMarker = null;
+    let ipMarker = null;
+    let greenMarker = null;
+    let lineLeg1 = null;
+    let lineLeg2 = null;
+    let lineGpsToGreen = null;
+    let gpsMarker = null;
+    let gpsShotOriginMarker = null;
+    let gpsWatchId = null;
+    let activePlacementTarget = 'tee';
+
+    const satState = {
+      locationName: '富士桜カントリー倶楽部',
+      centerLat: 35.4628,
+      centerLon: 138.7453,
+      tee: { lat: 35.4642, lon: 138.7441, elev: 48.5 },
+      ip:  { lat: 35.4628, lon: 138.7453, elev: 39.0 },
+      green: { lat: 35.4616, lon: 138.7464, elev: 34.3 },
+      gpsCurrent: null,
+      gpsShotOrigin: null,
+      lastCalc: { totalYd: 388, totalElevDiff: -14, leg1Yd: 232, leg2Yd: 158 }
+    };
+
+    function suggestClub(yd) {
+      if (yd >= 225) return '1W (ドライバー)';
+      if (yd >= 195) return '3W / 5W / UT';
+      if (yd >= 175) return '5I / 6I';
+      if (yd >= 155) return '7I / 8I';
+      if (yd >= 135) return '9I / PW';
+      if (yd >= 100) return 'AW / 50°';
+      return 'SW / アプローチ';
+    }
+
+    function renderQuickCoursesBar() {
+      const bar = document.getElementById('quick-courses-bar');
+      if (!bar) return;
+      bar.innerHTML = JAPAN_QUICK_COURSES.map(c => `
+        <button onclick="jumpSatelliteToCoords(${c.lat}, ${c.lon}, '${c.name}')" class="shrink-0 text-[11px] font-bold px-2.5 py-1 rounded-lg th-surface-sub hover:opacity-80 border transition">
+          ${c.name}
+        </button>
+      `).join('');
+    }
+
+    function setPlacementTarget(target) {
+      activePlacementTarget = target;
+      const styles = {
+        tee:   { id: 'place-btn-tee',   active: 'px-2.5 py-1 rounded-lg bg-red-600 text-white shadow-xs transition flex items-center gap-1.5' },
+        ip:    { id: 'place-btn-ip',    active: 'px-2.5 py-1 rounded-lg bg-blue-600 text-white shadow-xs transition flex items-center gap-1.5' },
+        green: { id: 'place-btn-green', active: 'px-2.5 py-1 rounded-lg bg-amber-600 text-white shadow-xs transition flex items-center gap-1.5' }
+      };
+      Object.entries(styles).forEach(([key, cfg]) => {
+        const el = document.getElementById(cfg.id);
+        el.className = key === target ? cfg.active : 'px-2.5 py-1 rounded-lg hover:bg-black/5 transition flex items-center gap-1.5';
+      });
+    }
+
+    function getGsiTileUrl(type) {
+      if (type === 'std') return 'https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png';
+      if (type === 'pale') return 'https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png';
+      return 'https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg';
+    }
+
+    function switchLeafletLayer(type) {
+      if (!leafletMap) return;
+      if (leafletTileLayer) leafletMap.removeLayer(leafletTileLayer);
+      leafletTileLayer = L.tileLayer(getGsiTileUrl(type), {
+        attribution: '地理院タイル (国土地理院)',
+        maxZoom: 18
+      }).addTo(leafletMap);
+    }
+
+    function initOrUpdateLeafletMap() {
+      if (typeof L === 'undefined') {
+        showToast('地図ライブラリの読み込み中です');
+        return;
+      }
+      if (!leafletMap) {
+        leafletMap = L.map('leaflet-map', {
+          center: [satState.centerLat, satState.centerLon],
+          zoom: 16
+        });
+
+        leafletTileLayer = L.tileLayer(getGsiTileUrl('photo'), {
+          attribution: '地理院タイル (国土地理院)',
+          maxZoom: 18
+        }).addTo(leafletMap);
+
+        const makeIcon = (bg, label) => L.divIcon({
+          className: '',
+          html: `<div class="golf-pin-badge" style="background:${bg}; width:26px; height:26px;">${label}</div>`,
+          iconSize: [26, 26],
+          iconAnchor: [13, 13]
+        });
+
+        teeMarker   = L.marker([satState.tee.lat, satState.tee.lon],     { draggable: true, icon: makeIcon('#dc2626', 'TEE') }).addTo(leafletMap);
+        ipMarker    = L.marker([satState.ip.lat, satState.ip.lon],       { draggable: true, icon: makeIcon('#2563eb', 'IP') }).addTo(leafletMap);
+        greenMarker = L.marker([satState.green.lat, satState.green.lon], { draggable: true, icon: makeIcon('#b45309', 'PIN') }).addTo(leafletMap);
+
+        lineLeg1 = L.polyline([], { color: '#d4b89c', weight: 3.5, dashArray: '6, 6' }).addTo(leafletMap);
+        lineLeg2 = L.polyline([], { color: '#ffffff', weight: 3.5, dashArray: '6, 6' }).addTo(leafletMap);
+        lineGpsToGreen = L.polyline([], { color: '#a855f7', weight: 3.5 }).addTo(leafletMap);
+
+        teeMarker.on('dragend', () => {
+          const p = teeMarker.getLatLng();
+          satState.tee.lat = p.lat; satState.tee.lon = p.lng;
+          recalculateSatelliteMetrics(true);
+        });
+        ipMarker.on('dragend', () => {
+          const p = ipMarker.getLatLng();
+          satState.ip.lat = p.lat; satState.ip.lon = p.lng;
+          recalculateSatelliteMetrics(true);
+        });
+        greenMarker.on('dragend', () => {
+          const p = greenMarker.getLatLng();
+          satState.green.lat = p.lat; satState.green.lon = p.lng;
+          recalculateSatelliteMetrics(true);
+          updateGpsDistanceDisplay(false);
+        });
+
+        leafletMap.on('click', (e) => {
+          const { lat, lng } = e.latlng;
+          if (activePlacementTarget === 'tee') {
+            satState.tee.lat = lat; satState.tee.lon = lng;
+            teeMarker.setLatLng([lat, lng]);
+            setPlacementTarget('ip');
+          } else if (activePlacementTarget === 'ip') {
+            satState.ip.lat = lat; satState.ip.lon = lng;
+            ipMarker.setLatLng([lat, lng]);
+            setPlacementTarget('green');
+          } else {
+            satState.green.lat = lat; satState.green.lon = lng;
+            greenMarker.setLatLng([lat, lng]);
+          }
+          recalculateSatelliteMetrics(true);
+          updateGpsDistanceDisplay(false);
+        });
+
+        recalculateSatelliteMetrics(true);
+      }
+
+      setTimeout(() => leafletMap.invalidateSize(), 150);
+    }
+
+    // --- リアルタイムGPS測位・自動追尾 ---
+    function toggleGpsTracking() {
+      if (gpsWatchId !== null) {
+        navigator.geolocation.clearWatch(gpsWatchId);
+        gpsWatchId = null;
+        document.getElementById('btn-gps-label').textContent = 'GPS測位開始';
+        document.getElementById('btn-gps-toggle').className =
+          'bg-violet-600 hover:bg-violet-500 text-white font-extrabold text-xs px-3.5 py-2 rounded-xl shadow flex items-center gap-1.5 transition active:scale-95';
+        document.getElementById('gps-status-text').textContent = 'GPS測位を一時停止しました';
+        showToast('GPS測位を停止しました');
+        return;
+      }
+
+      if (!('geolocation' in navigator)) {
+        showToast('この端末・ブラウザはGPS測位に対応していません');
+        return;
+      }
+
+      document.getElementById('gps-status-text').textContent = 'GPS衛星を捕捉中...（屋外での利用を推奨）';
+      document.getElementById('btn-gps-label').textContent = '測位中 / 停止';
+      document.getElementById('btn-gps-toggle').className =
+        'bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs px-3.5 py-2 rounded-xl shadow flex items-center gap-1.5 transition active:scale-95';
+
+      gpsWatchId = navigator.geolocation.watchPosition(
+        async (pos) => {
+          const { latitude, longitude, accuracy } = pos.coords;
+          const isFirstFix = !satState.gpsCurrent;
+
+          satState.gpsCurrent = {
+            lat: latitude,
+            lon: longitude,
+            accuracy: Math.round(accuracy),
+            elev: satState.gpsCurrent ? satState.gpsCurrent.elev : null
+          };
+
+          document.getElementById('btn-record-shot').disabled = false;
+          document.getElementById('gps-accuracy-label').textContent = `精度: ±${Math.round(accuracy)}m`;
+          document.getElementById('gps-status-text').textContent =
+            `GPS追尾中 (${latitude.toFixed(5)}, ${longitude.toFixed(5)})`;
+
+          if (leafletMap) {
+            const gpsIcon = L.divIcon({
+              className: '',
+              html: `<div class="gps-pulse-ring"><div class="gps-pulse-core"></div></div>`,
+              iconSize: [26, 26],
+              iconAnchor: [13, 13]
+            });
+
+            if (!gpsMarker) {
+              gpsMarker = L.marker([latitude, longitude], { icon: gpsIcon, zIndexOffset: 1000 }).addTo(leafletMap);
+            } else {
+              gpsMarker.setLatLng([latitude, longitude]);
+            }
+
+            if (isFirstFix) {
+              leafletMap.setView([latitude, longitude], 17);
+              // 初回測位時、グリーンピンが遠すぎる場合は現在地の約160yd先にグリーンピンを仮配置
+              const distCheck = calcYardsBetween(satState.gpsCurrent, satState.green);
+              if (distCheck > 800) {
+                satState.green.lat = latitude + 0.0013;
+                satState.green.lon = longitude + 0.0005;
+                greenMarker.setLatLng([satState.green.lat, satState.green.lon]);
+                recalculateSatelliteMetrics(true);
+                showToast('現在地を取得し、近くにグリーンピンを仮配置しました');
+              }
+            }
+          }
+
+          await updateGpsDistanceDisplay(true);
+        },
+        (err) => {
+          document.getElementById('gps-status-text').textContent =
+            'GPS取得エラー: 位置情報の許可またはHTTPS環境をご確認ください';
+          showToast('位置情報の取得が許可されていないか、測位できませんでした');
+        },
+        { enableHighAccuracy: true, maximumAge: 3000, timeout: 15000 }
+      );
+    }
+
+    async function updateGpsDistanceDisplay(fetchElev = true) {
+      if (!satState.gpsCurrent) return;
+
+      const ydToGreen = calcYardsBetween(satState.gpsCurrent, satState.green);
+      const ydToIp = calcYardsBetween(satState.gpsCurrent, satState.ip);
+
+      document.getElementById('gps-to-green-yd').textContent = ydToGreen;
+      document.getElementById('gps-to-ip-yd').textContent = ydToIp;
+
+      if (fetchElev) {
+        const elev = await fetchGsiElevation(satState.gpsCurrent.lat, satState.gpsCurrent.lon);
+        if (elev !== null) satState.gpsCurrent.elev = elev;
+      }
+
+      if (satState.gpsCurrent.elev !== null && satState.green.elev !== null) {
+        const diff = Math.round((satState.green.elev - satState.gpsCurrent.elev) * 10) / 10;
+        const adjYd = Math.max(0, Math.round(ydToGreen + diff * 1.1));
+        document.getElementById('gps-to-green-adj').textContent =
+          `高低差 ${diff >= 0 ? '+' : ''}${diff.toFixed(1)}m ➔ 実質 ${adjYd}yd`;
+        document.getElementById('gps-rec-club').textContent = `推奨: ${suggestClub(adjYd)}`;
+      } else {
+        document.getElementById('gps-to-green-adj').textContent = `直線距離: ${ydToGreen}yd`;
+        document.getElementById('gps-rec-club').textContent = `推奨: ${suggestClub(ydToGreen)}`;
+      }
+
+      // ショット飛距離（打点記録からの移動距離）
+      if (satState.gpsShotOrigin) {
+        const shotYd = calcYardsBetween(satState.gpsShotOrigin, satState.gpsCurrent);
+        document.getElementById('gps-shot-yd').textContent = shotYd;
+      }
+
+      // マップ上に現在地 ➔ グリーンの紫ライン描画
+      if (lineGpsToGreen) {
+        lineGpsToGreen.setLatLngs([
+          [satState.gpsCurrent.lat, satState.gpsCurrent.lon],
+          [satState.green.lat, satState.green.lon]
+        ]);
+        lineGpsToGreen.unbindTooltip();
+        lineGpsToGreen.bindTooltip(`GPS残り ${ydToGreen}yd`, {
+          permanent: true,
+          direction: 'center',
+          className: 'dist-tooltip-label gps-leg'
+        });
+      }
+    }
+
+    function recordShotOriginFromGps() {
+      if (!satState.gpsCurrent) {
+        showToast('先にGPS測位を開始してください');
+        return;
+      }
+      satState.gpsShotOrigin = { lat: satState.gpsCurrent.lat, lon: satState.gpsCurrent.lon };
+      document.getElementById('gps-shot-yd').textContent = '0';
+
+      if (leafletMap) {
+        const originIcon = L.divIcon({
+          className: '',
+          html: `<div class="golf-pin-badge" style="background:#7c3aed; width:22px; height:22px;">打</div>`,
+          iconSize: [22, 22],
+          iconAnchor: [11, 11]
+        });
+        if (!gpsShotOriginMarker) {
+          gpsShotOriginMarker = L.marker([satState.gpsShotOrigin.lat, satState.gpsShotOrigin.lon], { icon: originIcon }).addTo(leafletMap);
+        } else {
+          gpsShotOriginMarker.setLatLng([satState.gpsShotOrigin.lat, satState.gpsShotOrigin.lon]);
+        }
+      }
+      showToast('現在地をショット打点として記録しました！ボール地点へ移動すると飛距離が出ます');
+    }
+
+    function jumpSatelliteToCoords(lat, lon, labelName) {
+      satState.centerLat = lat;
+      satState.centerLon = lon;
+      satState.locationName = labelName;
+
+      satState.tee.lat = lat + 0.0014;
+      satState.tee.lon = lon - 0.0012;
+      satState.ip.lat  = lat;
+      satState.ip.lon  = lon;
+      satState.green.lat = lat - 0.0012;
+      satState.green.lon = lon + 0.0011;
+
+      if (leafletMap) {
+        leafletMap.setView([lat, lon], 16);
+        teeMarker.setLatLng([satState.tee.lat, satState.tee.lon]);
+        ipMarker.setLatLng([satState.ip.lat, satState.ip.lon]);
+        greenMarker.setLatLng([satState.green.lat, satState.green.lon]);
+        recalculateSatelliteMetrics(true);
+        updateGpsDistanceDisplay(false);
+      }
+      setPlacementTarget('tee');
+      showToast(`「${labelName}」の航空写真へ移動しました`);
+    }
+
+    async function searchJapanGolfCourse() {
+      const queryRaw = document.getElementById('golf-search-input').value.trim();
+      if (!queryRaw) {
+        showToast('検索したいゴルフ場名を入力してください');
+        return;
+      }
+
+      const btn = document.getElementById('btn-golf-search');
+      btn.disabled = true;
+      btn.textContent = '検索中...';
+
+      try {
+        const url = `https://nominatim.openstreetmap.org/search?format=json&countrycodes=jp&limit=6&q=${encodeURIComponent(queryRaw)}`;
+        const res = await fetch(url, { headers: { 'Accept-Language': 'ja' } });
+        const data = await res.json();
+
+        const box = document.getElementById('search-results-box');
+        if (!data || data.length === 0) {
+          box.classList.remove('hidden');
+          box.innerHTML = `<div class="text-xs text-amber-200 px-2 py-1.5">該当する場所が見つかりませんでした。正式名称（例：「〇〇カントリークラブ」）で再検索してください。</div>`;
+        } else if (data.length === 1) {
+          box.classList.add('hidden');
+          const item = data[0];
+          jumpSatelliteToCoords(parseFloat(item.lat), parseFloat(item.lon), item.display_name.split(',')[0]);
+        } else {
+          box.classList.remove('hidden');
+          box.innerHTML = data.map(item => {
+            const shortTitle = item.display_name.split(',')[0];
+            return `
+              <button onclick="selectSearchHit(${item.lat}, ${item.lon}, '${shortTitle.replace(/'/g, '')}')" class="w-full text-left px-3 py-2 rounded-lg hover:bg-white/15 text-xs text-white flex items-center justify-between gap-2 transition">
+                <span class="font-bold truncate">${item.display_name}</span>
+                <span class="th-accent-text shrink-0 font-bold">移動 →</span>
+              </button>
+            `;
+          }).join('');
+        }
+      } catch (err) {
+        showToast('検索通信エラーが発生しました');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg><span>航空写真検索</span>`;
+      }
+    }
+
+    function selectSearchHit(lat, lon, name) {
+      document.getElementById('search-results-box').classList.add('hidden');
+      jumpSatelliteToCoords(parseFloat(lat), parseFloat(lon), name);
+    }
+
+    async function fetchGsiElevation(lat, lon) {
+      try {
+        const url = `https://cyberjapandata2.gsi.go.jp/general/dem/scripts/getelevation.php?lon=${lon.toFixed(6)}&lat=${lat.toFixed(6)}&outtype=JSON`;
+        const res = await fetch(url);
+        const json = await res.json();
+        if (json && typeof json.elevation === 'number') return json.elevation;
+      } catch (e) {}
+      return null;
+    }
+
+    function calcYardsBetween(p1, p2) {
+      const R = 6371000;
+      const dLat = (p2.lat - p1.lat) * Math.PI / 180;
+      const dLon = (p2.lon - p1.lon) * Math.PI / 180;
+      const a = Math.sin(dLat / 2) ** 2 +
+                Math.cos(p1.lat * Math.PI / 180) * Math.cos(p2.lat * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
+      const meters = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return Math.round(meters * 1.09361);
+    }
+
+    async function recalculateSatelliteMetrics(fetchElevation = true) {
+      const tPos = [satState.tee.lat, satState.tee.lon];
+      const iPos = [satState.ip.lat, satState.ip.lon];
+      const gPos = [satState.green.lat, satState.green.lon];
+
+      if (lineLeg1) lineLeg1.setLatLngs([tPos, iPos]);
+      if (lineLeg2) lineLeg2.setLatLngs([iPos, gPos]);
+
+      const totalYd = calcYardsBetween(satState.tee, satState.green);
+      const leg1Yd = calcYardsBetween(satState.tee, satState.ip);
+      const leg2Yd = calcYardsBetween(satState.ip, satState.green);
+
+      if (lineLeg1) {
+        lineLeg1.unbindTooltip();
+        lineLeg1.bindTooltip(`${leg1Yd} yd`, { permanent: true, direction: 'center', className: 'dist-tooltip-label' });
+      }
+      if (lineLeg2) {
+        lineLeg2.unbindTooltip();
+        lineLeg2.bindTooltip(`${leg2Yd} yd`, { permanent: true, direction: 'center', className: 'dist-tooltip-label green-leg' });
+      }
+
+      document.getElementById('sat-total-yd').textContent = totalYd;
+      document.getElementById('sat-leg1-yd').textContent = leg1Yd;
+      document.getElementById('sat-leg2-yd').textContent = leg2Yd;
+
+      const statusBadge = document.getElementById('gsi-api-status');
+      if (fetchElevation) {
+        statusBadge.textContent = '標高取得中...';
+        const [eTee, eIp, eGreen] = await Promise.all([
+          fetchGsiElevation(satState.tee.lat, satState.tee.lon),
+          fetchGsiElevation(satState.ip.lat, satState.ip.lon),
+          fetchGsiElevation(satState.green.lat, satState.green.lon)
+        ]);
+
+        if (eTee !== null && eIp !== null && eGreen !== null) {
+          satState.tee.elev = eTee;
+          satState.ip.elev = eIp;
+          satState.green.elev = eGreen;
+          statusBadge.textContent = '地理院標高取得済 ✓';
+        } else {
+          satState.tee.elev = 42.0;
+          satState.ip.elev = 36.5;
+          satState.green.elev = 33.0;
+          statusBadge.textContent = '推定標高モード';
+        }
+      }
+
+      const totalElevDiff = Math.round((satState.green.elev - satState.tee.elev) * 10) / 10;
+      const leg1ElevDiff = Math.round((satState.ip.elev - satState.tee.elev) * 10) / 10;
+      const leg2ElevDiff = Math.round((satState.green.elev - satState.ip.elev) * 10) / 10;
+
+      const leg1Adj = Math.max(0, Math.round(leg1Yd + leg1ElevDiff * 1.1));
+      const leg2Adj = Math.max(0, Math.round(leg2Yd + leg2ElevDiff * 1.1));
+
+      document.getElementById('sat-total-elev-diff').textContent =
+        `${totalElevDiff >= 0 ? '+' : ''}${totalElevDiff.toFixed(1)}m (${totalElevDiff > 0 ? '打ち上げ' : totalElevDiff < 0 ? '打ち下ろし' : '平坦'})`;
+      document.getElementById('sat-elev-raw').textContent =
+        `Tee: ${satState.tee.elev.toFixed(1)}m → Grn: ${satState.green.elev.toFixed(1)}m`;
+
+      document.getElementById('sat-leg1-slope').textContent =
+        `高低差 ${leg1ElevDiff >= 0 ? '+' : ''}${leg1ElevDiff.toFixed(1)}m (実質 ${leg1Adj}y)`;
+      document.getElementById('sat-leg1-club').textContent = `推奨: ${suggestClub(leg1Adj)}`;
+
+      document.getElementById('sat-leg2-slope').textContent =
+        `高低差 ${leg2ElevDiff >= 0 ? '+' : ''}${leg2ElevDiff.toFixed(1)}m (実質 ${leg2Adj}y)`;
+      document.getElementById('sat-leg2-club').textContent = `推奨: ${suggestClub(leg2Adj)}`;
+
+      satState.lastCalc = { totalYd, totalElevDiff: Math.round(totalElevDiff), leg1Yd, leg2Yd };
+    }
+
+    function applySatelliteDataToHole() {
+      const course = getCurrentCourse();
+      const hole = course.holes[appState.currentHoleIndex];
+      const tee = appState.tee;
+
+      hole.yards[tee] = satState.lastCalc.totalYd;
+      hole.elevDiff = satState.lastCalc.totalElevDiff;
+      hole.teeTip = `【航空写真・GPS実測】${satState.locationName}（総距離 ${satState.lastCalc.totalYd}yd / 全体高低差 ${hole.elevDiff >= 0 ? '+' : ''}${hole.elevDiff}m）。IP地点まで ${satState.lastCalc.leg1Yd}yd。`;
+      hole.greenTip = `IP地点からピンまで残り ${satState.lastCalc.leg2Yd}yd。高低差を加味した番手選択でグリーンセンターを狙いましょう。`;
+
+      saveState();
+      renderAll();
+      showToast(`${course.name} HOLE ${hole.hole} に実測距離(${hole.yards[tee]}yd)と標高差(${hole.elevDiff}m)を保存しました！`);
+    }
+
+    function simulateCompetitorsStep() {
+      const holes = getCurrentCourse().holes;
+      let updatedCount = 0;
+      appState.players.forEach(p => {
+        if (!p.isMyGroup) {
+          const nextHoleIdx = p.scores.findIndex(s => s === null);
+          if (nextHoleIdx !== -1) {
+            const par = holes[nextHoleIdx].par;
+            const r = Math.random();
+            const delta = r < 0.12 ? -1 : r < 0.60 ? 0 : r < 0.90 ? 1 : 2;
+            p.scores[nextHoleIdx] = Math.max(1, par + delta);
+            updatedCount++;
+          }
+        }
+      });
+
+      if (updatedCount > 0) {
+        saveState();
+        if (activeTab === 'leaderboard') renderLeaderboard();
+        showToast(`他組（${updatedCount}名）の最新ホールスコアを受信しました！`);
+      } else {
+        showToast('他組は全員18ホールをホールアウト済みです');
+      }
+    }
+
+    // =========================================================================
+    // 10. コースマップ描画 & リーダーボード・チーム対抗戦集計処理
+    // =========================================================================
+    function getThemeCssVar(name) {
+      return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    }
+
+    function renderCourseMapView() {
+      const hole = getCurrentHole();
+      const tee = appState.tee;
+      const hHeader = document.getElementById('map-header-hole');
+      const hSub = document.getElementById('map-header-sub');
+      const applyHoleNum = document.getElementById('sat-apply-hole-num');
+      if (hHeader) hHeader.textContent = `HOLE ${hole.hole} • PAR ${hole.par}`;
+      if (hSub) hSub.textContent = `${hole.yards[tee]} YD • HDCP ${hole.hdcp}`;
+      if (applyHoleNum) applyHoleNum.textContent = hole.hole;
+
+      if (appState.mapViewMode === 'satellite') {
+        initOrUpdateLeafletMap();
+      } else {
+        renderIllustrationMap();
+      }
+    }
+
+    function renderIllustrationMap() {
+      const svg = document.getElementById('course-svg');
+      if (!svg) return;
+      const hole = getCurrentHole();
+      const tee = appState.tee;
+      const totalYd = hole.yards[tee];
+      const totalElev = hole.elevDiff || 0;
+
+      const cRough = getThemeCssVar('--svg-rough') || '#383b3e';
+      const cRoughAlt = getThemeCssVar('--svg-rough-alt') || '#323538';
+      const cFairway = getThemeCssVar('--svg-fairway') || '#5d645b';
+      const cFairwayStroke = getThemeCssVar('--svg-fairway-stroke') || '#757d72';
+      const cGreen = getThemeCssVar('--svg-green') || '#6b8068';
+      const cGreenLight = getThemeCssVar('--svg-green-light') || '#81997d';
+      const cLine1 = getThemeCssVar('--svg-line-1') || '#d4b89c';
+      const cLine2 = getThemeCssVar('--svg-line-2') || '#e6d5c3';
+
+      const teePos = { x: 180, y: 425 };
+      const pinOffsets = { front: 12, center: 0, back: -13 };
+      const pinLabels = { front: '手前 (-12y)', center: 'センター', back: '奥 (+13y)' };
+      const greenCenter = { x: 180 + (hole.dogleg || 0) * 0.65, y: 85 };
+      const pinPos = { x: greenCenter.x, y: greenCenter.y + (pinOffsets[appState.pinPosition] || 0) };
+      const target = appState.mapTarget || { x: 180, y: 230 };
+
+      const pinBadge = document.getElementById('map-pin-badge');
+      if (pinBadge) pinBadge.textContent = `ピン: ${pinLabels[appState.pinPosition] || 'センター'}`;
+
+      const fullPx = Math.hypot(pinPos.x - teePos.x, pinPos.y - teePos.y) || 1;
+      const leg1Px = Math.hypot(target.x - teePos.x, target.y - teePos.y);
+      const leg2Px = Math.hypot(pinPos.x - target.x, pinPos.y - target.y);
+
+      const ratio = Math.max(0.05, Math.min(0.98, leg1Px / fullPx));
+      const yd1 = Math.max(10, Math.round(totalYd * ratio));
+      const yd2Raw = Math.max(5, Math.round(totalYd * (leg2Px / fullPx)));
+
+      const elevAtTarget = Math.round(totalElev * ratio);
+      const leg2Elev = totalElev - elevAtTarget;
+      const yd2Adj = Math.max(5, Math.round(yd2Raw + leg2Elev * 1.1));
+
+      const elSummary = document.getElementById('illus-elev-summary');
+      const elDist1 = document.getElementById('dist-from-tee');
+      const elSlope1 = document.getElementById('slope-leg1');
+      const elClub1 = document.getElementById('club-suggestion-1');
+      const elDist2Adj = document.getElementById('dist-to-pin-adjusted');
+      const elDist2Raw = document.getElementById('dist-to-pin-raw');
+      const elClub2 = document.getElementById('club-suggestion-2');
+
+      if (elSummary) elSummary.textContent = `全体高低差: ${totalElev >= 0 ? '+' : ''}${totalElev}m`;
+      if (elDist1) elDist1.textContent = yd1;
+      if (elSlope1) elSlope1.textContent = `(${elevAtTarget >= 0 ? '+' : ''}${elevAtTarget}m)`;
+      if (elClub1) elClub1.textContent = `推奨: ${suggestClub(Math.round(yd1 + elevAtTarget * 1.1))}`;
+      if (elDist2Adj) elDist2Adj.textContent = yd2Adj;
+      if (elDist2Raw) elDist2Raw.textContent = `(実測 ${yd2Raw}y)`;
+      if (elClub2) elClub2.textContent = `推奨: ${suggestClub(yd2Adj)}`;
+
+      const teeTipEl = document.getElementById('mgmt-tee-tip');
+      const greenTipEl = document.getElementById('mgmt-green-tip');
+      const dangerTipEl = document.getElementById('mgmt-danger-tip');
+      if (teeTipEl) teeTipEl.textContent = hole.teeTip || '';
+      if (greenTipEl) greenTipEl.textContent = hole.greenTip || '';
+      if (dangerTipEl) dangerTipEl.textContent = hole.danger || '';
+
+      renderElevationProfileSvg(totalElev, ratio, elevAtTarget, cLine1, cLine2);
+
+      const midX = (teePos.x + greenCenter.x) / 2 + (hole.dogleg || 0) * 0.5;
+      const fairwayPath = hole.par === 3
+        ? `M 162 435 L 166 240 L 194 240 L 198 435 Z`
+        : `M 152 440 Q ${midX - 38} 255 ${greenCenter.x - 32} 115 L ${greenCenter.x + 32} 115 Q ${midX + 38} 255 208 440 Z`;
+
+      const waterSvg = hole.water
+        ? `<ellipse cx="${hole.water.x}" cy="${hole.water.y}" rx="${hole.water.rx}" ry="${hole.water.ry}" fill="#2b5d7c" stroke="#7dd3fc" stroke-width="2" opacity="0.88" />`
+        : '';
+
+      const bunkersSvg = (hole.bunkers || [])
+        .map(b => `<circle cx="${b.x}" cy="${b.y}" r="${b.r}" fill="#e6d7b9" stroke="#bfa77a" stroke-width="1.5" />`)
+        .join('');
+
+      svg.innerHTML = `
+        <rect width="360" height="480" fill="${cRough}" />
+        <g opacity="0.32" fill="${cRoughAlt}">
+          <circle cx="48" cy="95" r="26" /><circle cx="315" cy="120" r="30" />
+          <circle cx="42" cy="240" r="32" /><circle cx="322" cy="275" r="28" />
+          <circle cx="52" cy="380" r="24" /><circle cx="310" cy="390" r="26" />
+        </g>
+        <path d="${fairwayPath}" fill="${cFairway}" stroke="${cFairwayStroke}" stroke-width="2.5" />
+        ${waterSvg}
+        ${bunkersSvg}
+        <ellipse cx="${greenCenter.x}" cy="${greenCenter.y}" rx="34" ry="26" fill="${cGreen}" stroke="${cGreenLight}" stroke-width="2.5" />
+        <rect x="166" y="418" width="28" height="16" rx="4" fill="#d6d3cd" stroke="#ffffff" stroke-width="1.5" />
+        <line x1="${teePos.x}" y1="${teePos.y}" x2="${target.x}" y2="${target.y}" stroke="${cLine1}" stroke-width="2.5" stroke-dasharray="6 4" />
+        <line x1="${target.x}" y1="${target.y}" x2="${pinPos.x}" y2="${pinPos.y}" stroke="${cLine2}" stroke-width="2.5" stroke-dasharray="4 4" />
+        <circle cx="${target.x}" cy="${target.y}" r="16" fill="none" stroke="${cLine1}" stroke-width="1.5" opacity="0.7" />
+        <circle cx="${target.x}" cy="${target.y}" r="6" fill="${cLine1}" stroke="#1f2022" stroke-width="2" />
+        <rect x="${target.x - 32}" y="${target.y - 26}" width="64" height="17" rx="5" fill="rgba(31,32,34,0.88)" />
+        <text x="${target.x}" y="${target.y - 14}" text-anchor="middle" fill="${cLine1}" font-size="10" font-weight="900">${yd1} YD</text>
+        <rect x="${pinPos.x - 32}" y="${pinPos.y - 34}" width="64" height="17" rx="5" fill="rgba(31,32,34,0.88)" />
+        <text x="${pinPos.x}" y="${pinPos.y - 22}" text-anchor="middle" fill="#ffffff" font-size="10" font-weight="900">残 ${yd2Adj} YD</text>
+        <line x1="${pinPos.x}" y1="${pinPos.y}" x2="${pinPos.x}" y2="${pinPos.y - 16}" stroke="#ffffff" stroke-width="2" />
+        <polygon points="${pinPos.x},${pinPos.y - 16} ${pinPos.x + 11},${pinPos.y - 12} ${pinPos.x},${pinPos.y - 8}" fill="#dc2626" />
+        <circle cx="${pinPos.x}" cy="${pinPos.y}" r="3.5" fill="#ffffff" />
+      `;
+    }
+
+    function renderElevationProfileSvg(totalElev, ratio, elevAtTarget, cLine1, cLine2) {
+      const elSvg = document.getElementById('elevation-svg');
+      const diffLabel = document.getElementById('target-elev-diff');
+      if (diffLabel) {
+        diffLabel.textContent = `着弾: ${elevAtTarget >= 0 ? '+' : ''}${elevAtTarget}m / PIN: ${totalElev >= 0 ? '+' : ''}${totalElev}m`;
+      }
+      if (!elSvg) return;
+
+      const startY = 46;
+      const clampShift = Math.max(-24, Math.min(24, totalElev * 1.1));
+      const endY = startY - clampShift;
+      const midX = 30 + 280 * ratio;
+      const midY = startY - clampShift * ratio;
+
+      elSvg.innerHTML = `
+        <path d="M 30 78 L 30 ${startY} Q ${(30 + midX) / 2} ${(startY + midY) / 2} ${midX} ${midY} T 310 ${endY} L 310 78 Z" fill="rgba(212,184,156,0.22)" />
+        <path d="M 30 ${startY} Q ${(30 + midX) / 2} ${(startY + midY) / 2} ${midX} ${midY} T 310 ${endY}" fill="none" stroke="${cLine1}" stroke-width="2.5" />
+        <circle cx="30" cy="${startY}" r="4" fill="#ffffff" />
+        <text x="30" y="${startY - 7}" text-anchor="middle" fill="#ffffff" font-size="9" font-weight="800">TEE</text>
+        <circle cx="${midX}" cy="${midY}" r="4.5" fill="${cLine1}" />
+        <text x="${midX}" y="${midY - 7}" text-anchor="middle" fill="${cLine1}" font-size="9" font-weight="800">IP (${elevAtTarget >= 0 ? '+' : ''}${elevAtTarget}m)</text>
+        <circle cx="310" cy="${endY}" r="4.5" fill="${cLine2}" />
+        <text x="310" y="${endY - 7}" text-anchor="middle" fill="${cLine2}" font-size="9" font-weight="800">PIN (${totalElev >= 0 ? '+' : ''}${totalElev}m)</text>
+      `;
+    }
+
+    function setPinPosition(pos) {
+      appState.pinPosition = pos;
+      ['front', 'center', 'back'].forEach(p => {
+        const btn = document.getElementById(`pin-btn-${p}`);
+        if (!btn) return;
+        btn.className = p === pos
+          ? 'pin-btn py-1.5 rounded-xl text-xs font-bold th-accent-btn border border-white/30 transition'
+          : 'pin-btn py-1.5 rounded-xl text-xs font-bold border border-white/20 bg-white/10 text-white transition';
+      });
+      renderIllustrationMap();
+    }
+
+    function resetIllustrationTarget() {
+      const hole = getCurrentHole();
+      appState.mapTarget = {
+        x: 180 + (hole.dogleg || 0) * 0.35,
+        y: hole.par === 3 ? 85 : 225
+      };
+      if (activeTab === 'coursemap' && appState.mapViewMode === 'illustration') {
+        renderIllustrationMap();
+      }
+    }
+
+    (function bindCourseSvgTap() {
+      const svg = document.getElementById('course-svg');
+      if (!svg) return;
+      svg.addEventListener('click', (e) => {
+        const rect = svg.getBoundingClientRect();
+        const x = Math.round(((e.clientX - rect.left) / rect.width) * 360);
+        const y = Math.round(((e.clientY - rect.top) / rect.height) * 480);
+        appState.mapTarget = {
+          x: Math.max(30, Math.min(330, x)),
+          y: Math.max(60, Math.min(410, y))
+        };
+        renderIllustrationMap();
+      });
+    })();
+
+    function setRankingMode(mode) {
+      appState.rankingMode = mode;
+      const modes = ['net', 'manual', 'gross', 'team'];
+      modes.forEach(m => {
+        const btn = document.getElementById(`rank-mode-${m}`);
+        if (!btn) return;
+        btn.className = m === mode
+          ? 'px-2.5 py-1.5 rounded-lg th-header shadow-xs transition'
+          : 'px-2.5 py-1.5 rounded-lg hover:bg-black/5 transition';
+      });
+
+      const shinBanner = document.getElementById('shinperia-banner');
+      const manualBanner = document.getElementById('manual-hdcp-banner');
+      const teamPanel = document.getElementById('team-battle-panel');
+      if (shinBanner) shinBanner.classList.toggle('hidden', mode !== 'net');
+      if (manualBanner) manualBanner.classList.toggle('hidden', mode !== 'manual');
+      if (teamPanel) teamPanel.classList.toggle('hidden', mode !== 'team');
+
+      const basisSel = document.getElementById('team-scoring-basis');
+      if (basisSel) basisSel.value = appState.teamScoringBasis || 'manual';
+
+      saveState();
+      renderLeaderboard();
+    }
+
+    function setTeamScoringBasis(basis) {
+      appState.teamScoringBasis = basis;
+      saveState();
+      renderLeaderboard();
+    }
+
+    function updatePlayerTeam(playerId, teamId) {
+      const player = appState.players.find(p => p.id === playerId);
+      if (!player) return;
+      player.teamId = teamId;
+      saveState();
+      renderLeaderboard();
+    }
+
+    function updateTeamName(teamId, newName) {
+      const team = appState.teams.find(t => t.id === teamId);
+      const trimmed = newName.trim();
+      if (!team || !trimmed) return;
+      team.name = trimmed;
+      saveState();
+      renderLeaderboard();
+      showToast(`チーム名を「${trimmed}」に変更しました`);
+    }
+
+    function calcTeamStandings(enrichedPlayers) {
+      const basis = appState.teamScoringBasis || 'manual';
+      return appState.teams.map(team => {
+        const members = enrichedPlayers.filter(p => p.teamId === team.id);
+        const activeMembers = members.filter(p => p.stats.thru > 0);
+        const totalScore = activeMembers.reduce((sum, p) => {
+          if (basis === 'gross') return sum + p.stats.rawTotalGross;
+          if (basis === 'net') return sum + p.stats.rawNetScore;
+          return sum + p.stats.rawManualNetScore;
+        }, 0);
+        const avgScore = activeMembers.length > 0 ? totalScore / activeMembers.length : 999;
+        return {
+          ...team,
+          memberCount: members.length,
+          activeCount: activeMembers.length,
+          totalScore: Math.round(totalScore * 10) / 10,
+          avgScore
+        };
+      }).sort((a, b) => {
+        if (a.activeCount === 0) return 1;
+        if (b.activeCount === 0) return -1;
+        return a.avgScore - b.avgScore;
+      });
+    }
+
+    function renderLeaderboard() {
+      const body = document.getElementById('leaderboard-body');
+      if (!body) return;
+      const mode = appState.rankingMode || 'net';
+      const effectiveScoring = mode === 'team' ? (appState.teamScoringBasis || 'manual') : mode;
+
+      const hdcpHeader = document.getElementById('leaderboard-hdcp-col-header');
+      if (hdcpHeader) {
+        hdcpHeader.textContent = effectiveScoring === 'manual' ? '指定マイナス' : 'HDCP';
+      }
+
+      const enriched = appState.players.map(p => ({ ...p, stats: calcPlayerStats(p) }));
+      enriched.sort((a, b) => {
+        if (a.stats.thru === 0) return 1;
+        if (b.stats.thru === 0) return -1;
+        if (effectiveScoring === 'manual') {
+          return a.stats.manualNetToPar - b.stats.manualNetToPar || a.stats.toPar - b.stats.toPar;
+        } else if (effectiveScoring === 'gross') {
+          return a.stats.toPar - b.stats.toPar;
+        }
+        return a.stats.netToPar - b.stats.netToPar || a.stats.toPar - b.stats.toPar;
+      });
+
+      const teamCardsEl = document.getElementById('team-standings-cards');
+      if (teamCardsEl && mode === 'team') {
+        const standings = calcTeamStandings(enriched);
+        teamCardsEl.innerHTML = standings.map((t, idx) => `
+          <div class="th-surface rounded-xl p-3 border shadow-xs flex flex-col justify-between gap-1.5">
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-xs font-black px-2 py-0.5 rounded-full text-white" style="background-color:${t.color};">
+                ${t.activeCount > 0 ? `${idx + 1}位` : '-'}
+              </span>
+              <span class="text-[11px] th-muted font-bold">${t.memberCount}名所属</span>
+            </div>
+            <input type="text" value="${t.name}" onchange="updateTeamName('${t.id}', this.value)" class="font-extrabold text-sm bg-transparent border-b border-dashed border-gray-300 focus:outline-none py-0.5" />
+            <div class="flex items-baseline justify-between mt-1">
+              <span class="text-[11px] th-muted font-semibold">平均スコア</span>
+              <span class="text-lg font-black">${t.activeCount > 0 ? t.avgScore.toFixed(1) : '-'}</span>
+            </div>
+            <div class="text-[11px] th-muted text-right">チーム合計: <strong>${t.activeCount > 0 ? t.totalScore : '-'}</strong></div>
+          </div>
+        `).join('');
+      }
+
+      body.innerHTML = enriched.map((p, idx) => {
+        const displayName = getPlayerDisplayName(p, idx);
+        const rank = p.stats.thru > 0 ? idx + 1 : '-';
+        const rankBadge = rank === 1
+          ? 'bg-amber-500 text-white'
+          : rank === 2
+          ? 'bg-slate-400 text-white'
+          : rank === 3
+          ? 'bg-amber-700 text-white'
+          : 'th-surface-sub th-muted';
+
+        const teamOptions = appState.teams.map(t =>
+          `<option value="${t.id}" ${p.teamId === t.id ? 'selected' : ''}>${t.name}</option>`
+        ).join('') + `<option value="" ${!p.teamId ? 'selected' : ''}>未所属</option>`;
+
+        const hdcpCellHtml = effectiveScoring === 'manual'
+          ? `<div class="inline-flex items-center gap-1">
+              <button onclick="updatePlayerManualMinus('${p.id}', -1)" class="w-6 h-6 rounded th-surface-sub border font-black text-xs">−</button>
+              <input type="number" value="${p.manualMinus}" onchange="setPlayerManualMinusDirect('${p.id}', this.value)" class="w-11 text-center border rounded py-0.5 text-xs font-extrabold bg-white" />
+              <button onclick="updatePlayerManualMinus('${p.id}', 1)" class="w-6 h-6 rounded th-surface-sub border font-black text-xs">＋</button>
+            </div>`
+          : `<span class="font-semibold th-muted">${p.stats.hdcp.toFixed(1)}</span>`;
+
+        const finalNet = effectiveScoring === 'manual'
+          ? p.stats.manualNetScore
+          : effectiveScoring === 'gross'
+          ? p.stats.totalGross
+          : p.stats.netScore;
+
+        return `
+          <tr class="${p.isMyGroup ? 'bg-amber-50/40' : 'bg-white'} hover:bg-gray-50 transition">
+            <td class="py-2.5 px-2.5 text-center">
+              <span class="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-black ${rankBadge}">${rank}</span>
+            </td>
+            <td class="py-2.5 px-2.5">
+              <input type="text" value="${p.name || ''}" placeholder="${displayName}" onchange="updatePlayerName('${p.id}', this.value)" class="font-bold text-xs sm:text-sm bg-transparent border-b border-dashed border-gray-300 focus:border-gray-600 focus:outline-none w-full" />
+              <div class="text-[10px] th-muted font-semibold mt-0.5">第${p.group}組 ${p.isMyGroup ? '• 同組' : ''}</div>
+            </td>
+            <td class="py-2.5 px-2 text-center">
+              <select onchange="updatePlayerTeam('${p.id}', this.value)" class="text-[11px] font-bold th-surface-sub border rounded-lg px-1.5 py-1 focus:outline-none">
+                ${teamOptions}
+              </select>
+            </td>
+            <td class="py-2.5 px-2 text-center font-semibold text-xs">${p.stats.thru}H</td>
+            <td class="py-2.5 px-2 text-center font-semibold">${p.stats.outGross}</td>
+            <td class="py-2.5 px-2 text-center font-semibold">${p.stats.inGross}</td>
+            <td class="py-2.5 px-2 text-center font-extrabold">${p.stats.totalGross}</td>
+            <td class="py-2.5 px-2 text-center">${hdcpCellHtml}</td>
+            <td class="py-2.5 px-3 text-center font-black text-sm sm:text-base th-badge">${finalNet}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // =========================================================================
+    // 12. 共有モーダル・リセット機能
+    // =========================================================================
+    function generateShareSummaryText() {
+      const course = getCurrentCourse();
+      const mode = appState.rankingMode;
+      const effectiveScoring = mode === 'team' ? (appState.teamScoringBasis || 'manual') : mode;
+      const enriched = appState.players.map(p => ({ ...p, stats: calcPlayerStats(p) }));
+
+      enriched.sort((a, b) => {
+        if (a.stats.thru === 0) return 1;
+        if (b.stats.thru === 0) return -1;
+        if (effectiveScoring === 'manual') {
+          return a.stats.manualNetToPar - b.stats.manualNetToPar || a.stats.toPar - b.stats.toPar;
+        } else if (effectiveScoring === 'gross') {
+          return a.stats.toPar - b.stats.toPar;
+        }
+        return a.stats.netToPar - b.stats.netToPar || a.stats.toPar - b.stats.toPar;
+      });
+
+      let teamSectionText = '';
+      if (mode === 'team') {
+        const standings = calcTeamStandings(enriched).filter(t => t.activeCount > 0);
+        const teamLines = standings.map((t, i) =>
+          `${i + 1}位: ${t.name} | 平均 ${t.avgScore.toFixed(1)} (合計 ${t.totalScore} / ${t.activeCount}名)`
+        ).join('\n');
+        teamSectionText = `チーム対抗戦 順位速報\n${teamLines}\n\n`;
+      }
+
+      const modeTitle = effectiveScoring === 'manual'
+        ? '個人ハンデ戦（指定マイナス打数）NET順'
+        : effectiveScoring === 'gross'
+        ? 'グロス順'
+        : '新ペリアNET順';
+
+      const topLines = enriched.slice(0, 8).map((p, i) => {
+        const pName = getPlayerDisplayName(p, i);
+        const teamObj = appState.teams.find(t => t.id === p.teamId);
+        const teamTag = mode === 'team' && teamObj ? `[${teamObj.name}] ` : '';
+        if (effectiveScoring === 'manual') {
+          return `${i + 1}位: ${teamTag}${pName} | GROSS ${p.stats.totalGross} (−${p.stats.manualMinus}打) ➔ NET ${p.stats.manualNetScore} (${p.stats.thru}H)`;
+        }
+        return `${i + 1}位: ${teamTag}${pName} | GROSS ${p.stats.totalGross} / NET ${p.stats.netScore} (${p.stats.thru}H)`;
+      }).join('\n');
+
+      const my = enriched.find(p => p.id === 'p1') || enriched[0];
+      const myName = getPlayerDisplayName(my, 0);
+      const titleText = (appState.compName || '').trim() || 'GOLFINO ラウンド速報';
+      return `【${titleText}】スコア速報\nコース: ${course.name} (${appState.tee.toUpperCase()} TEE)\n\n${teamSectionText}リーダーボード（${modeTitle}）\n${topLines}\n\n${myName} の経過:\nOUT: ${my.stats.outGross} / IN: ${my.stats.inGross} / TOTAL: ${my.stats.totalGross} (${formatToPar(my.stats.toPar, my.stats.thru)})\n\n#GOLFINO #ゴルフィーノ`;
+    }
+
+    function openShareModal() {
+      document.getElementById('share-preview-text').value = generateShareSummaryText();
+      const modal = document.getElementById('share-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeShareModal() {
+      const modal = document.getElementById('share-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function copyShareText() {
+      const text = document.getElementById('share-preview-text').value;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('スコア速報テキストをクリップボードにコピーしました！');
+        closeShareModal();
+      });
+    }
+
+    function copyShareUrl() {
+      const my = appState.players[0];
+      const myName = getPlayerDisplayName(my, 0);
+      const stats = calcPlayerStats(my);
+      const url = new URL(window.location.href);
+      url.searchParams.set('course', getCurrentCourse().name);
+      url.searchParams.set('leader', `${myName}:${stats.totalGross}`);
+      navigator.clipboard.writeText(url.toString()).then(() => {
+        showToast('共有用URLリンクをコピーしました！');
+        closeShareModal();
+      });
+    }
+
+    function openResetConfirm() {
+      const modal = document.getElementById('reset-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeResetConfirm() {
+      const modal = document.getElementById('reset-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function executeReset() {
+      appState = createInitialState();
+      saveState();
+      closeResetConfirm();
+      renderAll();
+      showToast('初期データにリセットしました');
+    }
+
+    document.getElementById('tee-selector').addEventListener('change', (e) => {
+      appState.tee = e.target.value;
+      saveState();
+      renderAll();
+      showToast(`${appState.tee.toUpperCase()} TEE に切り替えました`);
+    });
+
+    // =========================================================================
+    // 13. 基本UI制御・スコアカード描画・統計計算ヘルパー
+    // =========================================================================
+    let activeTab = 'scorecard';
+
+    function switchTab(tabName) {
+      activeTab = tabName;
+      document.querySelectorAll('.tab-view').forEach(el => el.classList.add('hidden'));
+      const targetView = document.getElementById(`view-${tabName}`);
+      if (targetView) targetView.classList.remove('hidden');
+
+      document.querySelectorAll('.nav-btn-desktop').forEach(btn => {
+        const isTarget = btn.dataset.tab === tabName;
+        btn.style.borderColor = isTarget ? 'var(--accent-highlight)' : 'transparent';
+        btn.classList.toggle('text-white', isTarget);
+        btn.classList.toggle('font-bold', isTarget);
+        btn.classList.toggle('th-muted-dark', !isTarget);
+      });
+
+      document.querySelectorAll('.nav-btn-mobile').forEach(btn => {
+        const isTarget = btn.dataset.tab === tabName;
+        btn.classList.toggle('th-accent-text', isTarget);
+        btn.classList.toggle('font-bold', isTarget);
+        btn.classList.toggle('th-muted-dark', !isTarget);
+      });
+
+      if (tabName === 'coursemap') renderCourseMapView();
+      if (tabName === 'leaderboard') renderLeaderboard();
+      if (tabName === 'history') renderScoreHistory();
+    }
+
+    function setMapViewMode(mode) {
+      appState.mapViewMode = mode;
+      const illusBtn = document.getElementById('btn-mode-illustration');
+      const satBtn = document.getElementById('btn-mode-satellite');
+      const illusView = document.getElementById('subview-illustration');
+      const satView = document.getElementById('subview-satellite');
+
+      if (illusBtn && satBtn && illusView && satView) {
+        const activeCls = 'px-3 py-2 rounded-lg th-header shadow-xs transition flex items-center gap-1.5';
+        const inactiveCls = 'px-3 py-2 rounded-lg hover:bg-black/5 transition flex items-center gap-1.5';
+        illusBtn.className = mode === 'illustration' ? activeCls : inactiveCls;
+        satBtn.className = mode === 'satellite' ? activeCls : inactiveCls;
+        illusView.classList.toggle('hidden', mode !== 'illustration');
+        satView.classList.toggle('hidden', mode !== 'satellite');
+      }
+
+      if (mode === 'illustration') {
+        renderIllustrationMap();
+      } else {
+        initOrUpdateLeafletMap();
+      }
+      saveState();
+    }
+
+    function changeColorTheme(theme) {
+      appState.theme = theme;
+      applyColorTheme(theme);
+      saveState();
+      if (activeTab === 'coursemap' && appState.mapViewMode === 'illustration') {
+        renderIllustrationMap();
+      }
+    }
+
+    function applyColorTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme || 'earth');
+      const sel = document.getElementById('theme-selector');
+      if (sel) sel.value = theme || 'earth';
+    }
+
+    function togglePhonePreview() {
+      document.body.classList.toggle('phone-preview-mode');
+      const banner = document.getElementById('phone-preview-banner');
+      if (banner) banner.classList.toggle('hidden', !document.body.classList.contains('phone-preview-mode'));
+      if (leafletMap) setTimeout(() => leafletMap.invalidateSize(), 200);
+    }
+
+    function formatElevBadge(elev) {
+      if (!elev) return '平坦 ±0m';
+      return elev > 0 ? `打ち上げ +${elev}m` : `打ち下ろし ${elev}m`;
+    }
+
+    function formatToPar(diff, thru) {
+      if (thru === 0) return '-';
+      if (diff === 0) return 'E';
+      return diff > 0 ? `+${diff}` : `${diff}`;
+    }
+
+    function selectHole(index) {
+      appState.currentHoleIndex = Math.max(0, Math.min(17, index));
+      resetIllustrationTarget();
+      renderScorecardView();
+      if (activeTab === 'coursemap') renderCourseMapView();
+    }
+
+    function changeHole(delta) {
+      const next = (appState.currentHoleIndex + delta + 18) % 18;
+      selectHole(next);
+    }
+
+    function updatePlayerScore(playerId, delta) {
+      const player = appState.players.find(p => p.id === playerId);
+      if (!player) return;
+      const idx = appState.currentHoleIndex;
+      const par = getCurrentHole().par;
+      const current = player.scores[idx] === null ? par : player.scores[idx] + delta;
+      player.scores[idx] = Math.max(1, Math.min(15, current));
+      if (player.putts && player.putts[idx] === null) player.putts[idx] = 2;
+      saveState();
+      renderScorecardView();
+    }
+
+    function updatePlayerPutt(playerId, delta) {
+      const player = appState.players.find(p => p.id === playerId);
+      if (!player || !player.putts) return;
+      const idx = appState.currentHoleIndex;
+      const cur = player.putts[idx] === null ? 2 : player.putts[idx] + delta;
+      player.putts[idx] = Math.max(0, Math.min(9, cur));
+      saveState();
+      renderScorecardView();
+    }
+
+    function togglePlayerFw(playerId) {
+      const player = appState.players.find(p => p.id === playerId);
+      if (!player || !player.fw) return;
+      const idx = appState.currentHoleIndex;
+      player.fw[idx] = player.fw[idx] === true ? false : player.fw[idx] === false ? null : true;
+      saveState();
+      renderScorecardView();
+    }
+
+    function updatePlayerName(playerId, newName) {
+      const player = appState.players.find(p => p.id === playerId);
+      if (!player) return;
+      const trimmed = newName.trim();
+      player.name = trimmed;
+      saveState();
+      renderScorecardView();
+      renderLeaderboard();
+      if (trimmed) showToast(`プレイヤー名を「${trimmed}」に設定しました`);
+    }
+
+    function getPlayerDisplayName(player, fallbackIdx = 0) {
+      const n = (player && player.name) ? player.name.trim() : '';
+      return n || `プレイヤー ${fallbackIdx + 1}`;
+    }
+
+    function updateCompName(newName) {
+      appState.compName = newName.trim();
+      saveState();
+    }
+
+    function addNewPlayerRow() {
+      const nextNum = appState.players.length + 1;
+      const groupNum = Math.ceil(nextNum / 4);
+      appState.players.push({
+        id: 'p_' + Date.now(),
+        name: '',
+        group: groupNum,
+        teamId: nextNum % 2 === 1 ? 'teamA' : 'teamB',
+        isMyGroup: false,
+        manualMinus: 0,
+        scores: Array(18).fill(null),
+        putts: Array(18).fill(null),
+        fw: Array(18).fill(null)
+      });
+      saveState();
+      renderLeaderboard();
+      showToast(`参加者枠（第${groupNum}組）を1名追加しました`);
+    }
+
+    function updatePlayerManualMinus(playerId, delta) {
+      const player = appState.players.find(p => p.id === playerId);
+      if (!player) return;
+      player.manualMinus = Math.max(-36, Math.min(72, (player.manualMinus || 0) + delta));
+      saveState();
+      renderLeaderboard();
+    }
+
+    function setPlayerManualMinusDirect(playerId, val) {
+      const player = appState.players.find(p => p.id === playerId);
+      if (!player) return;
+      const num = parseInt(val, 10);
+      player.manualMinus = isNaN(num) ? 0 : Math.max(-36, Math.min(72, num));
+      saveState();
+      renderLeaderboard();
+    }
+
+    function resetAllManualHandicaps() {
+      appState.players.forEach(p => { p.manualMinus = 0; });
+      saveState();
+      renderLeaderboard();
+      showToast('全員の個人ハンデを 0打 にリセットしました');
+    }
+
+    function calcPlayerStats(player) {
+      const holes = getCurrentCourse().holes;
+      let outGross = 0, inGross = 0, outPar = 0, inPar = 0, thru = 0, hiddenSum = 0;
+
+      player.scores.forEach((sc, idx) => {
+        if (sc !== null && typeof sc === 'number') {
+          const par = holes[idx].par;
+          thru++;
+          if (idx < 9) { outGross += sc; outPar += par; }
+          else { inGross += sc; inPar += par; }
+          if (SHINPERIA_HIDDEN_HOLES.includes(idx + 1)) {
+            hiddenSum += Math.min(sc, par * 2);
+          }
+        }
+      });
+
+      const totalGross = outGross + inGross;
+      const playedPar = outPar + inPar;
+      const toPar = totalGross - playedPar;
+
+      const scale = thru > 0 ? (18 / thru) : 1;
+      const estHidden = hiddenSum * scale;
+      const rawHdcp = Math.max(0, Math.min(36, Math.round(((estHidden * 1.5 - 72) * 0.8) * 10) / 10));
+      const appliedHdcp = thru > 0 ? Math.round((rawHdcp * (thru / 18)) * 10) / 10 : 0;
+
+      const rawNetScore = Math.round((totalGross - appliedHdcp) * 10) / 10;
+      const netToPar = Math.round((rawNetScore - playedPar) * 10) / 10;
+
+      const manualMinus = player.manualMinus || 0;
+      const appliedManual = thru > 0 ? Math.round((manualMinus * (thru / 18)) * 10) / 10 : 0;
+      const rawManualNetScore = Math.round((totalGross - appliedManual) * 10) / 10;
+      const manualNetToPar = Math.round((rawManualNetScore - playedPar) * 10) / 10;
+
+      return {
+        thru,
+        outGross: thru > 0 ? outGross : '-',
+        inGross: thru > 9 ? inGross : '-',
+        totalGross: thru > 0 ? totalGross : '-',
+        rawTotalGross: totalGross,
+        toPar,
+        hdcp: rawHdcp,
+        netScore: thru > 0 ? rawNetScore.toFixed(1) : '-',
+        rawNetScore,
+        netToPar,
+        manualMinus,
+        manualNetScore: thru > 0 ? rawManualNetScore.toFixed(1) : '-',
+        rawManualNetScore,
+        manualNetToPar
+      };
+    }
+
+    function renderScoreMarkHtml(score, par) {
+      if (score === null) return '<span class="th-muted">-</span>';
+      const diff = score - par;
+      const cls = diff <= -2 ? 'score-eagle' : diff === -1 ? 'score-birdie' : diff === 0 ? 'score-par' : diff === 1 ? 'score-bogey' : 'score-double';
+      return `<span class="score-mark ${cls}">${score}</span>`;
+    }
+
+    function renderScorecardView() {
+      const course = getCurrentCourse();
+      const hole = getCurrentHole();
+      const tee = appState.tee;
+      const idx = appState.currentHoleIndex;
+
+      document.getElementById('course-type-badge').textContent = course.type;
+      document.getElementById('course-short-name').textContent = course.name;
+      const totalPar = course.holes.reduce((s, h) => s + h.par, 0);
+      document.getElementById('course-meta-line').textContent = `OUT / IN 18H ・ Par ${totalPar} ・ コースレート ${course.courseRate}`;
+      document.getElementById('course-weather-line').textContent = course.weather;
+
+      document.getElementById('current-hole-number').textContent = `HOLE ${hole.hole}`;
+      document.getElementById('current-hole-half').textContent = idx < 9 ? 'OUT' : 'IN';
+      document.getElementById('current-hole-elev-badge').textContent = formatElevBadge(hole.elevDiff);
+      document.getElementById('current-hole-par').textContent = `PAR ${hole.par}`;
+      document.getElementById('current-hole-yard').textContent = `${hole.yards[tee]} YD`;
+      document.getElementById('current-hole-hdcp').textContent = `HDCP ${hole.hdcp}`;
+
+      const myGroup = appState.players.filter(p => p.isMyGroup);
+      document.getElementById('hole-selector-bar').innerHTML = course.holes.map((h, i) => {
+        const isCurrent = i === idx;
+        const hasScore = myGroup.some(p => p.scores[i] !== null);
+        const btnCls = isCurrent
+          ? 'th-accent-btn ring-2 ring-white scale-105'
+          : hasScore
+          ? 'th-badge border font-bold'
+          : 'th-surface-sub border th-muted';
+        return `
+          <button onclick="selectHole(${i})" class="shrink-0 w-10 h-11 rounded-xl flex flex-col items-center justify-center text-xs font-extrabold transition ${btnCls}">
+            <span>${h.hole}H</span>
+            <span class="text-[9px] opacity-80">P${h.par}</span>
+          </button>
+        `;
+      }).join('');
+
+      document.getElementById('group-score-inputs').innerHTML = myGroup.map((p, pIdx) => {
+        const sc = p.scores[idx];
+        const putt = p.putts ? p.putts[idx] : null;
+        const fw = p.fw ? p.fw[idx] : null;
+        const stats = calcPlayerStats(p);
+        const fwLabel = hole.par === 3 ? 'PAR3' : fw === true ? 'FW ✓' : fw === false ? 'FW ✕' : 'FW -';
+        const fwCls = fw === true ? 'bg-emerald-600 text-white' : fw === false ? 'bg-rose-600/80 text-white' : 'bg-white/10 text-white/75';
+
+        return `
+          <div class="th-darker-box rounded-xl p-3 border flex items-center justify-between gap-2">
+            <div class="min-w-0 flex-1">
+              <input type="text" value="${p.name || ''}" placeholder="プレイヤー ${pIdx + 1}（名前入力）" onchange="updatePlayerName('${p.id}', this.value)" class="font-bold text-sm text-white placeholder-white/45 bg-transparent border-b border-white/20 focus:border-white focus:outline-none w-full pb-0.5" />
+              <div class="text-[11px] th-muted-dark mt-1">
+                TOTAL: <strong class="text-white">${stats.totalGross}</strong> (${formatToPar(stats.toPar, stats.thru)})
+              </div>
+              <div class="flex items-center gap-1.5 mt-1.5">
+                <button onclick="updatePlayerPutt('${p.id}', 1)" class="text-[10px] font-bold px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-white">
+                  PUTT: ${putt !== null ? putt : '-'}
+                </button>
+                <button onclick="togglePlayerFw('${p.id}')" ${hole.par === 3 ? 'disabled' : ''} class="text-[10px] font-bold px-2 py-0.5 rounded ${fwCls}">
+                  ${fwLabel}
+                </button>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 shrink-0">
+              <button onclick="updatePlayerScore('${p.id}', -1)" class="w-10 h-10 rounded-xl bg-white/15 hover:bg-white/25 text-white font-black text-xl flex items-center justify-center active:scale-90 transition">−</button>
+              <div class="w-11 text-center">
+                <div class="text-2xl font-black ${sc === null ? 'th-muted-dark' : 'th-accent-text'}">${sc !== null ? sc : hole.par}</div>
+                <div class="text-[9px] th-muted-dark font-bold">${sc === null ? '未入力' : '打数'}</div>
+              </div>
+              <button onclick="updatePlayerScore('${p.id}', 1)" class="w-10 h-10 rounded-xl th-accent-btn font-black text-xl flex items-center justify-center active:scale-90 transition">＋</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const outHoles = course.holes.slice(0, 9);
+      const inHoles = course.holes.slice(9, 18);
+      const outYdSum = outHoles.reduce((s, h) => s + h.yards[tee], 0);
+      const inYdSum = inHoles.reduce((s, h) => s + h.yards[tee], 0);
+      const outParSum = outHoles.reduce((s, h) => s + h.par, 0);
+      const inParSum = inHoles.reduce((s, h) => s + h.par, 0);
+
+      document.getElementById('out-yard-row').innerHTML = `<td class="py-1.5 px-3 text-left sticky left-0 th-surface-sub">YARD</td>${outHoles.map(h => `<td>${h.yards[tee]}</td>`).join('')}<td class="font-bold">${outYdSum}</td>`;
+      document.getElementById('out-par-row').innerHTML = `<td class="py-1.5 px-3 text-left sticky left-0 th-badge">PAR</td>${outHoles.map(h => `<td>${h.par}</td>`).join('')}<td class="font-extrabold">${outParSum}</td>`;
+      document.getElementById('out-score-body').innerHTML = myGroup.map((p, pIdx) => {
+        const stats = calcPlayerStats(p);
+        const dispName = getPlayerDisplayName(p, pIdx);
+        return `<tr class="bg-white"><td class="py-2 px-3 text-left font-bold sticky left-0 bg-white truncate max-w-[110px]">${dispName}</td>${outHoles.map((h, i) => `<td class="py-1.5 cursor-pointer" onclick="selectHole(${i})">${renderScoreMarkHtml(p.scores[i], h.par)}</td>`).join('')}<td class="font-black th-surface-sub">${stats.outGross}</td></tr>`;
+      }).join('');
+
+      document.getElementById('in-yard-row').innerHTML = `<td class="py-1.5 px-3 text-left sticky left-0 th-surface-sub">YARD</td>${inHoles.map(h => `<td>${h.yards[tee]}</td>`).join('')}<td class="font-bold">${inYdSum}</td><td class="font-bold">${outYdSum + inYdSum}</td>`;
+      document.getElementById('in-par-row').innerHTML = `<td class="py-1.5 px-3 text-left sticky left-0 th-badge">PAR</td>${inHoles.map(h => `<td>${h.par}</td>`).join('')}<td class="font-extrabold">${inParSum}</td><td class="font-extrabold">${outParSum + inParSum}</td>`;
+      document.getElementById('in-score-body').innerHTML = myGroup.map((p, pIdx) => {
+        const stats = calcPlayerStats(p);
+        const dispName = getPlayerDisplayName(p, pIdx);
+        return `<tr class="bg-white"><td class="py-2 px-3 text-left font-bold sticky left-0 bg-white truncate max-w-[110px]">${dispName}</td>${inHoles.map((h, i) => `<td class="py-1.5 cursor-pointer" onclick="selectHole(${i + 9})">${renderScoreMarkHtml(p.scores[i + 9], h.par)}</td>`).join('')}<td class="font-black th-surface-sub">${stats.inGross}</td><td class="font-black th-badge">${stats.totalGross}</td></tr>`;
+      }).join('');
+    }
+
+    function renderCourseSelector() {
+      const sel = document.getElementById('course-selector');
+      sel.innerHTML = appState.courses.map(c => `<option value="${c.id}" ${c.id === appState.selectedCourseId ? 'selected' : ''} class="text-black">${c.name}</option>`).join('');
+      sel.onchange = (e) => {
+        appState.selectedCourseId = e.target.value;
+        saveState();
+        renderAll();
+        showToast(`コースを「${getCurrentCourse().name}」に切り替えました`);
+      };
+    }
+
+    function openCourseManagerModal() {
+      const modal = document.getElementById('course-manager-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeCourseManagerModal() {
+      const modal = document.getElementById('course-manager-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function createNewCustomCourse() {
+      const name = document.getElementById('new-course-name').value.trim();
+      const type = document.getElementById('new-course-type').value;
+      if (!name) {
+        showToast('ゴルフ場名を入力してください');
+        return;
+      }
+      const baseHoles = JSON.parse(JSON.stringify(getCurrentCourse().holes));
+      const newId = 'custom_' + Date.now();
+      appState.courses.push({
+        id: newId,
+        name,
+        type,
+        courseRate: '72.0',
+        weather: '晴れ 18℃ / 風: 穏やか',
+        centerLat: satState.centerLat,
+        centerLon: satState.centerLon,
+        holes: baseHoles
+      });
+      appState.selectedCourseId = newId;
+      saveState();
+      closeCourseManagerModal();
+      renderAll();
+      showToast(`「${name}」を作成して切り替えました`);
+    }
+
+    function exportCurrentCourseJson() {
+      const jsonStr = JSON.stringify(getCurrentCourse(), null, 2);
+      document.getElementById('course-json-box').value = jsonStr;
+      navigator.clipboard.writeText(jsonStr).then(() => {
+        showToast('コースJSONデータをクリップボードにコピーしました');
+      });
+    }
+
+    function importCourseFromJson() {
+      try {
+        const raw = document.getElementById('course-json-box').value.trim();
+        const parsed = JSON.parse(raw);
+        if (!parsed || !parsed.name || !Array.isArray(parsed.holes) || parsed.holes.length !== 18) {
+          showToast('有効な18ホールコースJSONデータではありません');
+          return;
+        }
+        parsed.id = 'imported_' + Date.now();
+        appState.courses.push(parsed);
+        appState.selectedCourseId = parsed.id;
+        saveState();
+        closeCourseManagerModal();
+        renderAll();
+        showToast(`「${parsed.name}」を読み込みました`);
+      } catch (e) {
+        showToast('JSONの形式が正しくありません');
+      }
+    }
+
+    // =========================================================================
+    // 14. 初期化実行
+    // =========================================================================
+    // 14. 初期化実行 & スマホホーム画面用アプリアイコン自動生成
+    // =========================================================================
+    function generateAppleTouchIcon() {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = 180;
+        canvas.height = 180;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        // ブラウン＆グレーのグラデーション背景
+        const grad = ctx.createLinearGradient(0, 0, 180, 180);
+        grad.addColorStop(0, '#6b4e3d');
+        grad.addColorStop(1, '#1f2022');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, 180, 180);
+
+        // 内側のゴールドフレーム
+        ctx.strokeStyle = 'rgba(212, 184, 156, 0.45)';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(12, 12, 156, 156);
+
+        // Gロゴアーク
+        ctx.beginPath();
+        ctx.arc(88, 86, 46, -0.55, Math.PI * 1.82, true);
+        ctx.strokeStyle = '#f7f6f4';
+        ctx.lineWidth = 10;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+
+        // 弾道ライン
+        ctx.beginPath();
+        ctx.setLineDash([7, 6]);
+        ctx.moveTo(56, 114);
+        ctx.quadraticCurveTo(84, 58, 126, 56);
+        ctx.strokeStyle = '#d4b89c';
+        ctx.lineWidth = 5;
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // ピンフラッグ
+        ctx.beginPath();
+        ctx.moveTo(126, 46);
+        ctx.lineTo(126, 118);
+        ctx.strokeStyle = '#d4b89c';
+        ctx.lineWidth = 6;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(126, 46);
+        ctx.lineTo(150, 56);
+        ctx.lineTo(126, 66);
+        ctx.closePath();
+        ctx.fillStyle = '#d4b89c';
+        ctx.fill();
+
+        // ゴルフボール
+        ctx.beginPath();
+        ctx.arc(56, 114, 9, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+
+        // ブランド表記
+        ctx.fillStyle = '#e6d5c3';
+        ctx.font = '800 18px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('GOLFINO', 90, 158);
+
+        const touchLink = document.getElementById('apple-touch-icon');
+        if (touchLink) touchLink.href = canvas.toDataURL('image/png');
+      } catch (e) {}
+    }
+
+    function renderAll() {
+      applyColorTheme(appState.theme || 'earth');
+      const compInput = document.getElementById('header-comp-name');
+      if (compInput) compInput.value = appState.compName || '';
+      document.getElementById('tee-selector').value = appState.tee;
+      renderCourseSelector();
+      renderQuickCoursesBar();
+      renderScorecardView();
+      if (activeTab === 'coursemap') renderCourseMapView();
+      setRankingMode(appState.rankingMode || 'net');
+      renderScoreHistory();
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      generateAppleTouchIcon();
+      renderAll();
+    });
+  </script>
+</body>
+</html>
